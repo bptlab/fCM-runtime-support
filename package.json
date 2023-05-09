@@ -31,7 +31,8 @@
     "grunt-contrib-watch": "^1.1.0",
     "load-grunt-tasks": "^5.1.0",
     "stringify": "^5.2.0",
-    "time-grunt": "^2.0.0"
+    "time-grunt": "^2.0.0",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "bpmn-js": "^8.8.2",
