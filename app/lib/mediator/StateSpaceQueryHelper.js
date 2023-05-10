@@ -13,22 +13,31 @@ function compileQuery(objectives, goal) {
     const orderedObjectives = orderObjectives(objectives, goal)
     console.log('orderedObjectives', orderedObjectives)
 
-    query += getDataObjectStateFunctions([])
+    let objectiveEvaluations = ''
 
-    let formula = `val Goal = `
-    let formulaClosing = ''
+    let goalEvaluation = `val Goal = `
+    let goalEvaluationClosing = ''
+
+    let preliminaryFunctions = new Set()
 
     orderedObjectives.forEach((objective, objeciveIdx) => {
-        const {objectiveFunction, objectiveFunctionName} = getObjectiveFunction(objective)
-        query += objectiveFunction
-        formula += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`
-        if (objeciveIdx < orderedObjectives.length - 1) formula += 'andalso';
-        formulaClosing += '))'
+        const {objectiveFunction, objectiveFunctionName, newFunctions} = getObjectiveFunction(objective)
+        newFunctions.forEach(fun => 
+            preliminaryFunctions.add(fun)
+        )
+        objectiveEvaluations += objectiveFunction
+        goalEvaluation += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`
+        if (objeciveIdx < orderedObjectives.length - 1) goalEvaluation += 'andalso';
+        goalEvaluationClosing += '))'
     })
+
+    for (const fun of preliminaryFunctions) {
+        query += fun + '\n'
+    }
 
     let evaluation = "eval_node Goal 1;"
 
-    return query + formula + formulaClosing + '\n' + evaluation;
+    return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + '\n' + evaluation;
 }
 
 function orderObjectives(objectives, goal) {
@@ -50,8 +59,23 @@ function orderObjectives(objectives, goal) {
 }
 
 function getObjectiveFunction(objective) {
-    let condition = "FOL";
-    return {objectiveFunction: condition, objectiveFunctionName: condition}
+    const name = `check${objective.name}`;
+    const newFunctions = []
+    let objectiveFunction = `fun ${name} n = (`
+    objective.objects.forEach((object, objectIdx) => {
+        const {name, objectFunction} = getObjectFunction(object)
+        newFunctions.push(objectFunction)
+        objectiveFunction += `${name}(n) `
+        if (objectIdx < objective.objects.length - 1) objectiveFunction += 'andalso'
+    })
+    objectiveFunction += ');\n'
+    return {objectiveFunction, objectiveFunctionName: name, newFunctions}
+}
+
+function getObjectFunction(object) {
+    const name = ``
+    const objectFunction = ``
+    return {name, objectFunction}
 }
 
 const mainPage = "Main_Page";
