@@ -13,7 +13,7 @@ export class ExecutionState {
     }
 
     public executableActivities(activities: Activity[], resources: Resource[]): Activity[] {
-        return activities.filter(activity => activity.isExecutable(this.dataObjectInstances.map(DataObjectInstance => DataObjectInstance.state).flat(), resources));
+        return activities.filter(activity => activity.isExecutable(this.dataObjectInstances, resources));
     }
 
     // public executeActiviy(activitiy: Activity, instance: DataObjectInstance) {

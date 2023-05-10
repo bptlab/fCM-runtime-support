@@ -1,6 +1,7 @@
 import {IOSet} from "./IOSet";
 import {Role} from "../Role";
 import {Resource} from "../Resource";
+import {DataObjectInstance} from "../executionState/DataObjectInstance";
 
 export class Activity {
     name: string;
@@ -19,7 +20,7 @@ export class Activity {
         this.outputSet = output;
     }
 
-    public isExecutable(executionState: string[], resources: Resource[]): boolean {
-        return this.inputSets.some(inputSet => inputSet.satisfiedBy(executionState)) && resources.some(resource => resource.satisfies(this.role, this.NoP));
+    public isExecutable(executionState: DataObjectInstance[], resources: Resource[]): boolean {
+        return this.inputSets.some(inputSet => inputSet.isSatisfiedBy(executionState)) && resources.some(resource => resource.satisfies(this.role, this.NoP));
     }
 }

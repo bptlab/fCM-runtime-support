@@ -14,7 +14,7 @@ let cable = new Dataclass("cable");
 // Instances
 let mapleStreetInit = new DataObjectInstance("mapleStreet", house, "init");
 let mapleStreetPainted = new DataObjectInstance("mapleStreet", house, "painted");
-let redCableAvailable = new DataObjectInstance("redCable", house, "available");
+let redCableAvailable = new DataObjectInstance("redCable", cable, "available");
 
 // Roles
 let painter = new Role("painter");
