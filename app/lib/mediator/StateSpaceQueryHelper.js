@@ -1,17 +1,57 @@
 import {download} from '../util/FileUtil';
+import {is} from "bpmn-js/lib/util/ModelUtil";
 
 export function exportQuery(objectives, goal) {
-    console.log('exportQuery');
     const query = compileQuery(objectives, goal);
-    download('query.txt', query);
+    console.log(query)
+    // download('query.txt', query);
     return;
 }
 
 function compileQuery(objectives, goal) {
     let query = `use(ogpath^"ASKCTL/ASKCTLloader.sml");`;
-    console.log(objectives)
-    console.log(goal)
-    return query;
+    const orderedObjectives = orderObjectives(objectives, goal)
+    console.log('orderedObjectives', orderedObjectives)
+
+    query += getDataObjectStateFunctions([])
+
+    let formula = `val Goal = `
+    let formulaClosing = ''
+
+    orderedObjectives.forEach((objective, objeciveIdx) => {
+        const {objectiveFunction, objectiveFunctionName} = getObjectiveFunction(objective)
+        query += objectiveFunction
+        formula += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`
+        if (objeciveIdx < orderedObjectives.length - 1) formula += 'andalso';
+        formulaClosing += '))'
+    })
+
+    let evaluation = "eval_node Goal 1;"
+
+    return query + formula + formulaClosing + '\n' + evaluation;
+}
+
+function orderObjectives(objectives, goal) {
+    const goalDependencies = goal.goals[0].Elements.filter(element => is(element, 'dep:Dependency'))
+    const goalObjectives = goal.goals[0].Elements.filter(element => is(element, 'dep:Objective'))
+    const firstObjective = goalObjectives.find((objective) => goalDependencies.every(dependency => dependency.targetObjective.id !== objective.id))
+    let orderedObjectives = [firstObjective]
+    //TODO: Add correct sorting
+
+    orderedObjectives = objectives.map((objective, objectiveIdx) => ({
+        name: `Objective${objectiveIdx}`,
+        objects: objective.boardElements?.map(element => ({
+            name: element.instance.name ?? null,
+            class: element.classRef.name ?? null,
+            state: element.state.name ?? null
+        })) ?? []
+    }))
+    return orderedObjectives
+}
+
+function getObjectiveFunction(objective) {
+    let condition = "FOL";
+    return {objectiveFunction: condition, objectiveFunctionName: condition}
 }
 
 const mainPage = "Main_Page";
