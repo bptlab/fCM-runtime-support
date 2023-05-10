@@ -3,10 +3,10 @@ export class Activity {
     duration: number;
     NoP: number;
     role: Role;
-    input: InputSet[];
-    output: State[];
+    input: IOSet[];
+    output: IOSet[];
 
-    public constructor(name: string, duration: number, NoP: number, role: Role, input: InputSet[], output: State[]) {
+    public constructor(name: string, duration: number, NoP: number, role: Role, input: IOSet[], output: IOSet[]) {
         this.name = name;
         this.duration = duration;
         this.NoP = NoP;
@@ -15,22 +15,22 @@ export class Activity {
         this.output = output;
     }
 
-    public isExecutable(currentState: State[], ressources: Ressource[]): boolean {
-        return this.input.some(inputSet => inputSet.satisfiedBy(currentState)) && ressources.some(ressource => ressource.satisfies(this.role, this.NoP));
+    public isExecutable(currentState: State[], ressources: Resource[]): boolean {
+        return this.input.some(inputSet => inputSet.satisfiedBy(currentState)) && ressources.some(resource => resource.satisfies(this.role, this.NoP));
     }
 }
 
-export class InputSet {
-    set: Array<{ state: State, isList: boolean }>;
+export class IOSet {
+    set: Array<{ dataObject: State, isList: boolean }>;
 
-    public constructor(set: Array<{ state: State, isList: boolean }>) {
+    public constructor(set: Array<{ dataObject: State, isList: boolean }>) {
         this.set = set;
     }
 
     public satisfiedBy(currentState: State[]): boolean {
         let satisfiedBy = true;
         this.set.forEach(function (State) {
-                if (!currentState.includes(State.state)) {
+                if (!currentState.includes(State.dataObject)) {
                     satisfiedBy = false;
                 }
             }
@@ -47,7 +47,7 @@ export class Role {
     }
 }
 
-export class Ressource {
+export class Resource {
     name: string;
     role: Role;
     capacity: number;
@@ -116,21 +116,21 @@ export class ProjectState {
         this.associations = associations;
     }
 
-    public executableActivites(activities: Activity[], ressources: Ressource[]): Activity[] {
-        return activities.filter(element => element.isExecutable(this.instances.map(element => element.state).flat(), ressources));
+    public executableActivites(activities: Activity[], resources: Resource[]): Activity[] {
+        return activities.filter(element => element.isExecutable(this.instances.map(element => element.state).flat(), resources));
     }
 
-    public executeActiviy(activitiy: Activity, instance: Instance) {
-        let indexInInstances = this.instances.indexOf(instance);
-        let indexInOutput = activitiy.output.map(element => element.dataclass).indexOf(instance.state[0].dataclass);
-        if (indexInOutput === -1) {
-            console.error("This Activity does not change the state of this instance.")
-        }
-        if (indexInInstances === -1) {
-            console.error("This instance does not exist at the current state.")
-        }
-        this.instances[indexInInstances].state.splice(indexInInstances, 1, activitiy.output[indexInOutput]);
-    }
+    // public executeActiviy(activitiy: Activity, instance: Instance) {
+    //     let indexInInstances = this.instances.indexOf(instance);
+    //     let indexInOutput = activitiy.output.map(element => element.dataclass).indexOf(instance.state[0].dataclass);
+    //     if (indexInOutput === -1) {
+    //         console.error("This Activity does not change the state of this instance.")
+    //     }
+    //     if (indexInInstances === -1) {
+    //         console.error("This instance does not exist at the current state.")
+    //     }
+    //     this.instances[indexInInstances].state.splice(indexInInstances, 1, activitiy.output[indexInOutput]);
+    // }
 }
 
 export class Objective extends ProjectState {
