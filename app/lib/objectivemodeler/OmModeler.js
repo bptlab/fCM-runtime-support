@@ -345,6 +345,14 @@ OmModeler.prototype.getVisualsWithInstance = function (instance) {
     );
 }
 
+OmModeler.prototype.getAllObjectives = function () {
+    let objectives = this._definitions.get('rootElements');
+    let objects = objectives.map(objective => objective.get('boardElements')).flat(1).filter((element) =>
+        is(element, 'om:Object'))
+    console.log(objects)
+    return objectives;
+}
+
 OmModeler.prototype.getObjectsWithInstance = function (instance) {
     let objectives = this._definitions.get('rootElements');
     let objects = objectives.map(objective => objective.get('boardElements')).flat(1).filter((element) =>

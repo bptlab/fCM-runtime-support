@@ -6,6 +6,7 @@ import AbstractHook from './AbstractHook';
 import CommonEvents from '../common/CommonEvents';
 import ObjectiveEvents from "../objectivemodeler/ObjectiveEvents";
 import OlcEvents from '../olcmodeler/OlcEvents';
+import {exportQuery} from './StateSpaceQueryHelper';
 
 const DEFAULT_EVENT_PRIORITY = 1000; //From diagram-js/lib/core/EventBus.DEFAULT_PRIORITY
 
@@ -221,6 +222,13 @@ Mediator.prototype.olcRenamed = function (olc, name) {
 
 // === Role helpers
 
+Mediator.prototype.exportQuery = function () {
+    console.log('Mediator.prototype.exportQuery')
+    let objectives = this.objectiveModelerHook.modeler.getAllObjectives();
+    let goal = this.dependencyModelerHook.modeler.getGoal();
+    exportQuery(objectives, goal)
+}
+
 Mediator.prototype.roleListChanged = function () {
     let roles = this.roleModelerHook.modeler.getRoles();
     this.fragmentModelerHook.modeler.handleRoleListChanged(roles);
@@ -417,6 +425,10 @@ Mediator.prototype.DependencyModelerHook = function (eventBus, dependencyModeler
         const objective = event.objective.businessObject;
         this.mediator.renamedObjective(objective, objective.name);
     });
+
+    eventBus.on('export.state-space-query', () => {
+        this.mediator.exportQuery()
+    })
 }
 inherits(Mediator.prototype.DependencyModelerHook, CommandInterceptor);
 

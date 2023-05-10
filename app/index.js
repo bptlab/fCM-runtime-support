@@ -24,8 +24,7 @@ import conferenceTerminationCondition from '../resources/conferenceModel/termina
 import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
-const LOAD_DUMMY = false; // Set to true to load conference example data
-const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
+import {LOAD_DUMMY, SHOW_DEBUG_BUTTONS, ENABLE_CONSTRUCTION_MODE} from './featureFlags'
 
 
 var mediator = new Mediator();
@@ -103,11 +102,9 @@ const errorBar = new ErrorBar(document.getElementById("errorBar"), mediator);
 const checker = new Checker(mediator, errorBar);
 var currentModeler = fragmentModeler;
 
-// construction Mode for User Study, to enable set constructionMode to true
-const constructionMode = false;
 mediator.getModelers().forEach(modeler => {
         var header = document.getElementById("title" + modeler.id);
-        header.innerHTML = modeler.name(constructionMode);
+        header.innerHTML = modeler.name(ENABLE_CONSTRUCTION_MODE);
     }
 )
 
@@ -237,8 +234,8 @@ async function navigationDropdown() {
     selectedOlcSpan.style.userSelect = 'none';
     selectOlcComponent.showValue = function (modeler) {
         this.value = modeler;
-        selectedOlcSpan.innerText = this.value.name(constructionMode) ?
-            this.value.name(constructionMode)
+        selectedOlcSpan.innerText = this.value.name(ENABLE_CONSTRUCTION_MODE) ?
+            this.value.name(ENABLE_CONSTRUCTION_MODE)
             : 'buggy';
     }
     var selectOlcMenu = getDropdown();
@@ -258,7 +255,7 @@ async function navigationDropdown() {
     function repopulateDropdown() {
         var modelers = mediator.getModelers();
         modelers.sort((a, b) => {return a.rank - b.rank});
-        if (constructionMode) {
+        if (ENABLE_CONSTRUCTION_MODE) {
             modelers = modelers.filter(object => object !== terminationConditionModeler);
         }
         var valueBefore = selectOlcComponent.value;
@@ -266,7 +263,7 @@ async function navigationDropdown() {
             showModeler(modeler);
             selectOlcComponent.showValue(modeler);
             selectOlcMenu.hide();
-        }, undefined, modeler => modeler.name(constructionMode));
+        }, undefined, modeler => modeler.name(ENABLE_CONSTRUCTION_MODE));
         selectOlcComponent.showValue(valueBefore);
     }
 
