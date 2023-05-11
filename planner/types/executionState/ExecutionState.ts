@@ -2,6 +2,7 @@ import {Activity} from "../fragments/Activity";
 import {Resource} from "../Resource";
 import {DataObjectInstance} from "./DataObjectInstance";
 import {InstanceLink} from "./InstanceLink";
+import {Dataclass} from "../Dataclass";
 
 export class ExecutionState {
     dataObjectInstances: DataObjectInstance[];
@@ -14,6 +15,10 @@ export class ExecutionState {
 
     public executableActivities(activities: Activity[], resources: Resource[]): Activity[] {
         return activities.filter(activity => activity.isExecutable(this.dataObjectInstances, resources));
+    }
+
+    public getDataObjectInstanceOfClass(dataclass: Dataclass): DataObjectInstance[] {
+        return this.dataObjectInstances.filter(DataObjectInstance => DataObjectInstance.dataclass === dataclass);
     }
 
     // public executeActiviy(activitiy: Activity, instance: DataObjectInstance) {
