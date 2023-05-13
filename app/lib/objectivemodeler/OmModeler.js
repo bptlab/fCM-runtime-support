@@ -41,11 +41,11 @@ var initialDiagram =
     `<?xml version="1.0" encoding="UTF-8"?>
 <om:definitions xmlns:om="http://tk/schema/od" xmlns:odDi="http://tk/schema/odDi">
     <om:odBoard id="Board" />
-    <odDi:odRootBoard id="StartBoard" name="Start State" objectiveRef="start_state">
+    <odDi:odRootBoard id="StartBoard" name="Objective 1" objectiveRef="start_state">
         <odDi:odPlane id="Plane" boardElement="Board" />
     </odDi:odRootBoard>
     <om:odBoard id="Board2" />
-    <odDi:odRootBoard id="FinalBoard" name="Final State" objectiveRef="final_state">
+    <odDi:odRootBoard id="FinalBoard" name="Objective 2" objectiveRef="final_state">
         <odDi:odPlane id="Plane2" boardElement="Board2" />
     </odDi:odRootBoard>
 </om:definitions>`;

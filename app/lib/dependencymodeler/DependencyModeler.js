@@ -36,8 +36,8 @@ var emptyDiagram =
   `<?xml version="1.0" encoding="UTF-8"?>
 <dep:definitions xmlns:olc="http://bptlab/schema/olc" xmlns:olcDi="http://bptlab/schema/olcDi">
   <dep:goal id="MainGoal">
-    <dep:objective id="start_state" type="dep:Objective" name="Start State" x="465" y="293" />
-    <dep:objective id="final_state" type="dep:Objective" name="Final State" x="765" y="293" />
+    <dep:objective id="start_state" type="dep:Objective" name="Objective 1" x="465" y="293" />
+    <dep:objective id="final_state" type="dep:Objective" name="Objective 2" x="765" y="293" />
   </dep:goal>
 </dep:definitions>`;
 

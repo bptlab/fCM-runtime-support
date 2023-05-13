@@ -4,14 +4,13 @@ import {is} from "bpmn-js/lib/util/ModelUtil";
 export function exportQuery(objectives, goal) {
     const query = compileQuery(objectives, goal);
     console.log(query)
-    // download('query.txt', query);
+    //download('query.txt', query);
     return;
 }
 
 function compileQuery(objectives, goal) {
-    let query = `use(ogpath^"ASKCTL/ASKCTLloader.sml");`;
+    let query = `use(ogpath^"ASKCTL/ASKCTLloader.sml");\n`;
     const orderedObjectives = orderObjectives(objectives, goal)
-    console.log('orderedObjectives', orderedObjectives)
 
     let objectiveEvaluations = ''
 
@@ -27,35 +26,17 @@ function compileQuery(objectives, goal) {
         )
         objectiveEvaluations += objectiveFunction
         goalEvaluation += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`
-        if (objeciveIdx < orderedObjectives.length - 1) goalEvaluation += 'andalso';
+        if (objeciveIdx < orderedObjectives.length - 1) goalEvaluation += ' andalso ';
         goalEvaluationClosing += '))'
     })
 
     for (const fun of preliminaryFunctions) {
-        query += fun + '\n'
+        query += fun
     }
 
     let evaluation = "eval_node Goal 1;"
 
-    return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + '\n' + evaluation;
-}
-
-function orderObjectives(objectives, goal) {
-    const goalDependencies = goal.goals[0].Elements.filter(element => is(element, 'dep:Dependency'))
-    const goalObjectives = goal.goals[0].Elements.filter(element => is(element, 'dep:Objective'))
-    const firstObjective = goalObjectives.find((objective) => goalDependencies.every(dependency => dependency.targetObjective.id !== objective.id))
-    let orderedObjectives = [firstObjective]
-    //TODO: Add correct sorting
-
-    orderedObjectives = objectives.map((objective, objectiveIdx) => ({
-        name: `Objective${objectiveIdx}`,
-        objects: objective.boardElements?.map(element => ({
-            name: element.instance.name ?? null,
-            class: element.classRef.name ?? null,
-            state: element.state.name ?? null
-        })) ?? []
-    }))
-    return orderedObjectives
+    return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + ';\n' + evaluation;
 }
 
 function getObjectiveFunction(objective) {
@@ -66,16 +47,38 @@ function getObjectiveFunction(objective) {
         const {name, objectFunction} = getObjectFunction(object)
         newFunctions.push(objectFunction)
         objectiveFunction += `${name}(n) `
-        if (objectIdx < objective.objects.length - 1) objectiveFunction += 'andalso'
+        if (objectIdx < objective.objects.length - 1) objectiveFunction += 'andalso '
     })
     objectiveFunction += ');\n'
     return {objectiveFunction, objectiveFunctionName: name, newFunctions}
 }
 
 function getObjectFunction(object) {
-    const name = ``
-    const objectFunction = ``
+    const name = `${object.name}Of${object.class}IsIn${object.state}`
+    // TODO: also check ID
+    let objectFunction = `fun ${name} n = (`
+    objectFunction += `length(Mark.${mainPage}'${object.class}__${object.state} 1 n) <> 0`;
+    objectFunction += `);\n`
     return {name, objectFunction}
+}
+
+
+function orderObjectives(objectives, goal) {
+  const goalDependencies = goal.goals[0].Elements.filter(element => is(element, 'dep:Dependency'))
+  const goalObjectives = goal.goals[0].Elements.filter(element => is(element, 'dep:Objective'))
+  const firstObjective = goalObjectives.find((objective) => goalDependencies.every(dependency => dependency.targetObjective.id !== objective.id))
+  let orderedObjectives = [firstObjective]
+  //TODO: Add correct sorting
+
+  orderedObjectives = objectives.map((objective, objectiveIdx) => ({
+      name: `Objective${objectiveIdx}`,
+      objects: objective.boardElements?.map(element => ({
+          name: element.instance?.name ?? null,
+          class: element.classRef?.name ?? null,
+          state: element.state?.name ?? null,
+      })) ?? []
+  }))
+  return orderedObjectives
 }
 
 const mainPage = "Main_Page";
