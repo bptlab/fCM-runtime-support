@@ -25,6 +25,13 @@ import conferenceTerminationCondition from '../resources/conferenceModel/termina
 import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
+import {Planner} from "../planner/Planner";
+import {is} from "bpmn-js/lib/util/ModelUtil";
+import {Dataclass} from "../planner/types/Dataclass";
+import {Activity} from "../planner/types/fragments/Activity";
+import {Resource} from "../planner/types/Resource";
+import {Role} from "../planner/types/Role";
+
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
 
@@ -216,6 +223,33 @@ async function importFromZip(zipData) {
     await objectiveModeler.importXML(await files.objectiveModel.async("string"));
     await resourceModeler.importXML(await files.resourceModel.async("string"));
     checker.activate();
+}
+
+async function generatePlan() {
+    const planner = new Planner();
+
+    let dataclasses = dataModeler.get('elementRegistry').filter(element => is(element, 'od:Class'));
+    for (let dataclass of dataclasses) {
+        planner.dataclasses.push(new Dataclass(dataclass.name));
+    }
+
+    let activities = fragmentModeler.get('elementRegistry').filter(element => is(element, 'bpmn:Task'));
+    for (let activity of activities) {
+        let input;
+        let output;
+        planner.activities.push(new Activity(activity.name, activity.duration, activity.NoP, activity.role, input, output));
+    }
+
+    let resources = resourceModeler.get('elementRegistry').filter(element => is(element, 'Resource'));
+    for (let resource of resources) {
+        planner.resources.push(new Resource(resource.name, resource.roles, resources.capacity));
+    }
+
+    let roles = roleModeler.get('elementRegistry').filter(element => is(element, 'Role'));
+    for (let role of roles) {
+        planner.roles.push(new Role(role.name));
+    }
+
 }
 
 // IO Buttons
