@@ -52,7 +52,7 @@ export class ExecutionAction {
         return this.runningTime == this.action.duration;
     }
 
-    //todo hier weitermachen
+
     public tryToFinish(executionState: ExecutionState): ExecutionState {
         if (this.canFinish()) {
             return this.finish(executionState);
@@ -64,10 +64,12 @@ export class ExecutionAction {
         }
     }
 
+    //todo hier weitermachen
     private finish(executionState: ExecutionState): ExecutionState {
         let availableDataObjects = executionState.availableExecutionDataObjectInstances.concat(this.outputList);
         let blockedDataObjects = this.getNewBlockedDataObjects(executionState);
-        let instanceLinks = this.getNewInstanceLinks(executionState);
+        let instanceLinks = executionState.instanceLinks.concat(this.addedInstanceLinks);
+        //todo eher ab hier weitermachen
         let resources = this.getNewResources(executionState);
         let time = executionState.time;
         let runningActions = executionState.runningActions.filter((action) => action !== this);
@@ -78,15 +80,15 @@ export class ExecutionAction {
 
     private getNewBlockedDataObjects(executionState: ExecutionState): ExecutionDataObjectInstance[] {
         let changedDataObjectInstances = this.getChangedExecutionDataObjectInstances();
-        return executionState.blockedExecutionDataObjectInstances.filter((dataObject) => !changedDataObjectInstances.includes(dataObject));
+        return executionState.blockedExecutionDataObjectInstances.filter(executionDataObjectInstance => !changedDataObjectInstances.some(it => it.dataObjectInstance === executionDataObjectInstance.dataObjectInstance));
     }
 
-    private getNewInstanceLinks(executionState: ExecutionState): InstanceLink[] {
-        let oldInstanceLinks = executionState.instanceLinks;
-        let newInstanceLinks = oldInstanceLinks.filter((instanceLink) => !this.addedInstanceLinks.includes(instanceLink));
-        newInstanceLinks = newInstanceLinks.concat(this.addedInstanceLinks);
-        return newInstanceLinks;
-    }
+    // private getNewInstanceLinks(executionState: ExecutionState): InstanceLink[] {
+    //     let oldInstanceLinks = executionState.instanceLinks;
+    //     let newInstanceLinks = oldInstanceLinks.filter((instanceLink) => !this.addedInstanceLinks.includes(instanceLink));
+    //     newInstanceLinks = newInstanceLinks.concat(this.addedInstanceLinks);
+    //     return newInstanceLinks;
+    // }
 
     private getNewResources(executionState: ExecutionState): Resource[] {
         let oldResources = executionState.resources;
