@@ -1,18 +1,17 @@
 import {Dataclass} from "../Dataclass";
 import {DataObjectInstance} from "../executionState/DataObjectInstance";
+import {ExecutionDataObjectInstance} from "../executionState/ExecutionDataObjectInstance";
 
 export class ObjectiveNode {
-    name: string;
-    dataclass: Dataclass;
+    dataObjectInstance: DataObjectInstance;
     states: string[];
 
-    public constructor (name: string, dataclass: Dataclass, states: string[]) {
-        this.name = name;
-        this.dataclass = dataclass;
+    public constructor(dataObjectInstance: DataObjectInstance, states: string[]) {
+        this.dataObjectInstance = dataObjectInstance;
         this.states = states;
     }
 
-    public isMatchedBy (dataObjectInstance: DataObjectInstance) {
-        return this.name === dataObjectInstance.name && this.dataclass === dataObjectInstance.dataclass && this.states.includes(dataObjectInstance.state);
+    public isMatchedBy (executionDataObjectInstance: ExecutionDataObjectInstance) {
+        return this.dataObjectInstance === executionDataObjectInstance.dataObjectInstance && this.states.includes(executionDataObjectInstance.state);
     }
 }

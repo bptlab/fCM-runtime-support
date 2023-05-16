@@ -1,5 +1,6 @@
 import {Dataclass} from "../Dataclass";
 import {DataObjectInstance} from "../executionState/DataObjectInstance";
+import {ExecutionDataObjectInstance} from "../executionState/ExecutionDataObjectInstance";
 
 export class DataObjectReference {
     dataclass: Dataclass;
@@ -12,7 +13,7 @@ export class DataObjectReference {
         this.isList = isList;
     }
 
-    public isMatchedBy (dataObjectInstance: DataObjectInstance) {
-        return this.dataclass === dataObjectInstance.dataclass && this.state === dataObjectInstance.state;
+    public isMatchedBy (executionDataObjectInstance: ExecutionDataObjectInstance) {
+        return this.dataclass === executionDataObjectInstance.dataObjectInstance.dataclass && this.state === executionDataObjectInstance.state;
     }
 }

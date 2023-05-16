@@ -2,10 +2,11 @@ import {IOSet} from "./IOSet";
 import {Resource} from "../Resource";
 import {DataObjectInstance} from "../executionState/DataObjectInstance";
 import {ExecutionAction} from "../executionState/ExecutionAction";
-import {Activity} from "./Activity";
 import {ExecutionState} from "../executionState/ExecutionState";
 import {Role} from "../Role";
-import {DataObjectReference} from "./DataObjectReference";
+import {cartesianProduct} from "../../Util";
+import {InstanceLink} from "../executionState/InstanceLink";
+import {ExecutionDataObjectInstance} from "../executionState/ExecutionDataObjectInstance";
 
 export class Action {
     name: string;
@@ -25,30 +26,67 @@ export class Action {
     }
 
     public getExecutionActions(executionState: ExecutionState): ExecutionAction[] {
+        if (!this.isExecutable(executionState)) {
+            return [];
+        }
         let possibleInstances = [];
         for (let dataObjectReference of this.inputSet.set) {
-            let matchingInstances = executionState.dataObjectInstances.filter(dataObjectInstance => dataObjectInstance.isAvailable && dataObjectReference.isMatchedBy(dataObjectInstance));
+            let matchingInstances = executionState.availableExecutionDataObjectInstances.filter(executionDataObjectInstance => dataObjectReference.isMatchedBy(executionDataObjectInstance));
             possibleInstances.push(matchingInstances);
         }
-        const cartesian = (...a) => a.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
-
-        let inputs = cartesian(...possibleInstances);
+        let inputs = cartesianProduct(...possibleInstances);
+        let possibleResources = executionState.resources.filter(resource => resource.satisfies(this.role, this.NoP))
+        let executionActions = []
+        for (let input of inputs) {
+            for (let resource of possibleResources) {
+                executionActions.push(this.getExecutionActionForInput(input, resource, executionState));
+            }
+        }
+        return executionActions;
     }
 
-    private getExecutionActionForInput(inputList: DataObjectInstance[], resource: Resource) {
-        let outputList = this.getOutputForInput(inputList);
-        return new ExecutionAction(this, 0, resource, inputList, outputList,[]);
+    private getExecutionActionForInput(inputList: ExecutionDataObjectInstance[], resource: Resource, executionState: ExecutionState) {
+        let outputList = this.getOutputForInput(inputList, executionState);
+        let addedLinks = this.getAddedLinks(inputList.map(input => input.dataObjectInstance), outputList.map(output => output.dataObjectInstance));
+        return new ExecutionAction(this, 0, resource, inputList, outputList, addedLinks);
     }
 
-    private getOutputForInput(inputList: DataObjectInstance[]): DataObjectInstance[] {
-        let output = this.outputSet.set.map(dataObjectReference => {
-            let instance = inputList.find(dataObjectInstance => dataObjectInstance.dataclass === dataObjectReference.dataclass);
+    private getOutputForInput(inputList: ExecutionDataObjectInstance[], executionState: ExecutionState): ExecutionDataObjectInstance[] {
+        let output = this.outputSet.set.map(output => {
+            let instance = inputList.find(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance.dataclass === output.dataclass);
             if (instance) {
-                return new DataObjectInstance(instance.name, instance.dataclass, dataObjectReference.states[0]);
+                return new ExecutionDataObjectInstance(instance.dataObjectInstance, output.state);
             } else {
-                return new DataObjectInstance("new", dataObjectReference.dataclass, dataObjectReference.states[0]);
+                let newDataObjectInstance = executionState.getNewDataObjectInstanceOfClass(output.dataclass);
+                return new ExecutionDataObjectInstance(newDataObjectInstance, output.state);
             }
         });
         return output;
+    }
+
+    private isExecutable(executionState: ExecutionState) {
+        return this.inputSet.isSatisfiedBy(executionState.availableExecutionDataObjectInstances) && executionState.resources.some(resource => resource.satisfies(this.role, this.NoP));
+    }
+
+    private getAddedLinks(inputList: DataObjectInstance[], outputList: DataObjectInstance[]): InstanceLink[] {
+        let addedLinks: InstanceLink[] = [];
+        let addedObjects: DataObjectInstance[] = this.getAddedObjects(inputList, outputList);
+        let readObjects = inputList.filter(inputEntry => !outputList.find(outputEntry => inputEntry.dataclass === outputEntry.dataclass));
+        let allObjects = outputList.concat(readObjects);
+
+        for (let output of addedObjects) {
+            for (let object of allObjects) {
+                //todo check if equality check works
+                if (output != object) {
+                    addedLinks.push(new InstanceLink(output, object));
+                }
+            }
+        }
+
+        return addedLinks;
+    }
+
+    private getAddedObjects(inputList: DataObjectInstance[], outputList: DataObjectInstance[]) {
+        return outputList.filter(outputEntry => !inputList.find(inputEntry => inputEntry.dataclass === outputEntry.dataclass));
     }
 }

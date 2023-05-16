@@ -21,17 +21,11 @@ export class Planner {
                 node = startState;
             }
             if (goal.isFulfilledBy(node)) {
-                return new ExecutionLog(node.actionHistory, node.dataObjectInstances);
+                return new ExecutionLog(node.actionHistory, node.allExecutionDataObjectInstances().map(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance));
             }
             let newNodes = node.getSuccessors(activities);
 
             queue.push(...newNodes);
-
-            for (let activity of node.executableActivities(activities)) {
-                let simulatedState = startState;
-                activity.execute(simulatedState, simulatedState.dataObjectInstances);
-                queue.push(simulatedState);
-            }
         }
         return new ExecutionLog();
     }

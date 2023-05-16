@@ -1,5 +1,4 @@
 import {ObjectiveNode} from "./ObjectiveNode";
-import {DataObjectInstance} from "../executionState/DataObjectInstance";
 import {InstanceLink} from "../executionState/InstanceLink";
 
 export class NodeLink {
@@ -11,8 +10,7 @@ export class NodeLink {
         this.second = second;
     }
 
-    //todo eigentlich müssten IDs gecheckt werden - Namen müssen nicht eindeutig sein
-    public isMatchedBy (instanceLink: InstanceLink) {
-        return (this.first.name === instanceLink.first.name && this.second.name === instanceLink.second.name) || (this.second.name === instanceLink.first.name && this.first.name === instanceLink.second.name);
+    public isMatchedBy(instanceLink: InstanceLink) {
+        return (this.first.dataObjectInstance === instanceLink.first && this.second.dataObjectInstance === instanceLink.second) || (this.second.dataObjectInstance === instanceLink.first && this.first.dataObjectInstance === instanceLink.second);
     }
 }

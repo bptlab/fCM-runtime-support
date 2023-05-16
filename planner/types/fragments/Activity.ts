@@ -71,7 +71,7 @@ export class Activity {
         let createdDataObjectReferences: DataObjectReference[] = this.createdDataObjectReferences();
         let changedDataObjectReferences: DataObjectReference[] = this.changedDataObjectReferences();
         for (let dataObjectReference of createdDataObjectReferences) {
-            let newDataObjectInstanceName: string = dataObjectReference.dataclass.name + ":" + (executionState.getDataObjectInstancesOfClass(dataObjectReference.dataclass).length + 1);
+            let newDataObjectInstanceName: string = dataObjectReference.dataclass.name + ":" + (executionState.getNewDataObjectInstanceOfClass(dataObjectReference.dataclass).length + 1);
             let newDataObjectInstance: DataObjectInstance = new DataObjectInstance(newDataObjectInstanceName, dataObjectReference.dataclass, dataObjectReference.states[0]);
 
             // This creates links to every DataObjectInstance that is part of the input and does not respect the restriction by the fcM to only link when there exists an association between the dataclasses
