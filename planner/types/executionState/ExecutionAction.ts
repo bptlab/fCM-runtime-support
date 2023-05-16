@@ -41,7 +41,8 @@ export class ExecutionAction {
         let runningActions = executionState.runningActions.filter((action) => action !== this);
 
         let actionHistory = this.getNewActionHistory(executionState);
-        return new ExecutionState(dataObjects, instanceLinks, resources, time, runningActions, actionHistory,);
+        let objectiveArray = executionState.objectives.slice();
+        return new ExecutionState(dataObjects, instanceLinks, resources, time, runningActions, actionHistory, objectiveArray);
     }
 
     private getNewDataObjects(executionState: ExecutionState): DataObjectInstance[] {

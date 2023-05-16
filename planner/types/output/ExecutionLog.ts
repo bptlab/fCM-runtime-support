@@ -5,8 +5,8 @@ export class ExecutionLog {
     actionList: OutputAction[];
     workSpaces: DataObjectInstance[];
 
-    public constructor() {
-        this.actionList = [];
-        this.workSpaces = [];
+    public constructor(actionList: OutputAction[] = [], workSpaces: DataObjectInstance[] = []) {
+        this.actionList = actionList;
+        this.workSpaces = workSpaces
     }
 }

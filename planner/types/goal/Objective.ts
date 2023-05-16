@@ -14,12 +14,14 @@ export class Objective {
     }
 
     public isFulfilledBy(state: ExecutionState) {
+        if (this.deadline && state.time > this.deadline) {
+            return false;
+        }
         for (let dataObjectNode of this.dataObjectNodes) {
             if (!state.dataObjectInstances.some(dataObjectInstance => dataObjectNode.isMatchedBy(dataObjectInstance))) {
                 return false;
             }
         }
-
         for (let objectiveLinks of this.objectiveLinks) {
             if (!state.instanceLinks.some(instanceLink => objectiveLinks.isMatchedBy(instanceLink))) {
                 return false;
