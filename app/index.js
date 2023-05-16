@@ -31,6 +31,8 @@ import {Dataclass} from "../planner/types/Dataclass";
 import {Activity} from "../planner/types/fragments/Activity";
 import {Resource} from "../planner/types/Resource";
 import {Role} from "../planner/types/Role";
+import {ObjectiveNode} from "../planner/types/goal/ObjectiveNode";
+import {NodeLink} from "../planner/types/goal/NodeLink";
 
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -233,21 +235,49 @@ async function generatePlan() {
         planner.dataclasses.push(new Dataclass(dataclass.name));
     }
 
+    let roles = roleModeler.get('elementRegistry').filter(element => is(element, 'Role'));
+    for (let role of roles) {
+        planner.roles.push(new Role(role.name));
+    }
+
+    let resources = resourceModeler.get('elementRegistry').filter(element => is(element, 'Resource'));
+    for (let resource of resources) {
+        let roleModelReference = resource.role;
+        let rolePlanReference = planner.roles.find(element => element.name === roleModelReference.name);
+        planner.resources.push(new Resource(resource.name, rolePlanReference, resources.capacity));
+    }
+
+    /*
     let activities = fragmentModeler.get('elementRegistry').filter(element => is(element, 'bpmn:Task'));
     for (let activity of activities) {
         let input;
         let output;
         planner.activities.push(new Activity(activity.name, activity.duration, activity.NoP, activity.role, input, output));
     }
+    */
 
-    let resources = resourceModeler.get('elementRegistry').filter(element => is(element, 'Resource'));
-    for (let resource of resources) {
-        planner.resources.push(new Resource(resource.name, resource.roles, resources.capacity));
+    let objectiveNodes = objectiveModeler.get('elementRegistry').filter(element => is(element, 'om:Object'));
+    for (let objectiveNode of objectiveNodes) {
+        let dataclassModelReference = objectiveNode.dataclass;
+        let dataclassPlanReference = planner.dataclasses.find(element => element.name === dataclassModelReference.name);
+        planner.objectiveNodes.push(new ObjectiveNode(objectiveNode.name, dataclassPlanReference, objectiveNode.states));
     }
 
-    let roles = roleModeler.get('elementRegistry').filter(element => is(element, 'Role'));
-    for (let role of roles) {
-        planner.roles.push(new Role(role.name));
+    let objectiveNodeLinks = objectiveModeler.get('elementRegistry').filter(element => is(element, 'om:Link'));
+    for (let objectiveNodeLink of objectiveNodeLinks) {
+        let startObjectiveNodeLinkModelReference = objectiveNodeLink.sourceRef;
+        let startObjectiveNodeLinkPlanReference = planner.objectiveNodes.find(element => element.name === startObjectiveNodeLinkModelReference.name);
+        let endObjectiveNodeLinkModelReference = objectiveNodeLink.targetRef;
+        let endObjectiveNodeLinkPlanReference = planner.objectiveNodes.find(element => element.name === endObjectiveNodeLinkModelReference.name);
+        planner.objectiveNodeLinks.push(new NodeLink(startObjectiveNodeLinkPlanReference, endObjectiveNodeLinkPlanReference));
+    }
+
+    let objectives = dependencyModeler.get('elementRegistry').filter(element => is(element, 'dep:Objective'));
+    for (let objective of objectives) {
+        let objectiveModelReference = objective;
+
+
+        //planner.objectives.push(new Objective(, , objective.deadline));
     }
 
 }

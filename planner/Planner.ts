@@ -7,6 +7,8 @@ import {Dataclass} from "./types/Dataclass";
 import {InstanceLink} from "./types/executionState/InstanceLink";
 import {DataObjectReference} from "./types/fragments/DataObjectReference";
 import {Role} from "./types/Role";
+import {ObjectiveNode} from "./types/goal/ObjectiveNode";
+import {NodeLink} from "./types/goal/NodeLink";
 
 export class Planner {
 
@@ -14,6 +16,9 @@ export class Planner {
     activities: Activity[];
     resources: Resource[];
     roles: Role[];
+    objectiveNodes: ObjectiveNode[];
+    objectiveNodeLinks: NodeLink[];
+    objectives: Objective[];
 
     public simulateUntil(startState: ExecutionState, goal: Objective, activities: Activity[], resources: Resource[]): boolean {
         let queue: ExecutionState[] = [];
