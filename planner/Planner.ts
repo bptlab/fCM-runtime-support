@@ -5,10 +5,12 @@ import {ExecutionState} from "./types/executionState/ExecutionState";
 import {Objective} from "./types/goal/Objective";
 import {ExecutionLog} from "./types/output/ExecutionLog";
 import {Goal} from "./types/goal/Goal";
+import {Action} from "./types/fragments/Action";
 
 export class Planner {
     goal: Goal = new Goal();
-    public simulateUntil(startState: ExecutionState, goal: Goal, activities: Activity[], resources: Resource[]): ExecutionLog {
+
+    public simulateUntil(startState: ExecutionState, goal: Goal, activities: Action[], resources: Resource[]): ExecutionLog {
         let queue: ExecutionState[] = [startState];
         while (queue.length > 0) {
             let test = queue.pop();

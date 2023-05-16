@@ -13,7 +13,6 @@ export class ExecutionState {
     resources: Resource[];
     time: number;
     objectives: boolean[] = [];
-
     runningActions: ExecutionAction[];
     actionHistory: OutputAction[];
 

@@ -4,25 +4,28 @@ import {Resource} from "../Resource";
 import {ExecutionState} from "./ExecutionState";
 import {OutputAction} from "../output/OutputAction";
 import {InstanceLink} from "./InstanceLink";
+import {Action} from "../fragments/Action";
 
 export class ExecutionAction {
-    activity: Activity;
+    action: Action;
     runningTime: number;
     resource: Resource | null
     inputList: DataObjectInstance[];
     outputList: DataObjectInstance[];
+    addedInstanceLinks: InstanceLink[];
     //todo: newLinks: InstanceLink[];
 
-    public constructor(activity: Activity, runningTime: number, resource: Resource, inputList: DataObjectInstance[], outputList: DataObjectInstance[]) {
-        this.activity = activity;
+    public constructor(action: Action, runningTime: number, resource: Resource, inputList: DataObjectInstance[], outputList: DataObjectInstance[], addedInstanceLinks: InstanceLink[]) {
+        this.action = action;
         this.runningTime = runningTime;
         this.resource = resource;
         this.inputList = inputList;
         this.outputList = outputList;
+        this.addedInstanceLinks = addedInstanceLinks;
     }
 
     private canFinish(): boolean {
-        return this.runningTime >= this.activity.duration;
+        return this.runningTime >= this.action.duration;
     }
 
     public tryToFinish(executionState: ExecutionState): ExecutionState | null {
@@ -54,8 +57,8 @@ export class ExecutionAction {
 
     private getNewInstanceLinks(executionState: ExecutionState): InstanceLink[] {
         let oldInstanceLinks = executionState.instanceLinks;
-        let newInstanceLinks = oldInstanceLinks.filter((instanceLink) => !this.newLinks.includes(instanceLink));
-        newInstanceLinks = newInstanceLinks.concat(this.newLinks);
+        let newInstanceLinks = oldInstanceLinks.filter((instanceLink) => !this.addedInstanceLinks.includes(instanceLink));
+        newInstanceLinks = newInstanceLinks.concat(this.addedInstanceLinks);
         return newInstanceLinks;
     }
 
@@ -63,7 +66,7 @@ export class ExecutionAction {
         let oldResources = executionState.resources;
         let newResources = oldResources.map((resource) => {
             if (resource === this.resource) {
-                return new Resource(resource.name, resource.role, resource.capacity + this.activity.NoP);
+                return new Resource(resource.name, resource.role, resource.capacity + this.action.NoP);
             } else {
                 return resource;
             }
@@ -73,7 +76,7 @@ export class ExecutionAction {
 
     private getNewActionHistory(executionState: ExecutionState): OutputAction[] {
         let oldActionHistory = executionState.actionHistory;
-        let newActionHistory = oldActionHistory.concat(new OutputAction(this.activity, executionState.time - this.activity.duration, executionState.time, this.resource, this.activity.NoP, this.inputList, this.outputList));
+        let newActionHistory = oldActionHistory.concat(new OutputAction(this.action, executionState.time - this.action.duration, executionState.time, this.resource, this.action.NoP, this.inputList, this.outputList));
         return newActionHistory;
     }
 }
