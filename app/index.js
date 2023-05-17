@@ -25,14 +25,15 @@ import conferenceTerminationCondition from '../resources/conferenceModel/termina
 import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
-import {Planner} from "../planner/Planner";
-import {is} from "bpmn-js/lib/util/ModelUtil";
-import {Dataclass} from "../planner/types/Dataclass";
+import {Planner} from "../planner/Planner.js";
+import {is} from "bpmn-js/lib/util/ModelUtil.js";
+import {Dataclass} from "../planner/types/Dataclass.js";
 import {Activity} from "../planner/types/fragments/Activity";
-import {Resource} from "../planner/types/Resource";
-import {Role} from "../planner/types/Role";
-import {ObjectiveNode} from "../planner/types/goal/ObjectiveNode";
-import {NodeLink} from "../planner/types/goal/NodeLink";
+import {Resource} from "../planner/types/Resource.js";
+import {Role} from "../planner/types/Role.js";
+import {ObjectiveNode} from "../planner/types/goal/ObjectiveNode.js";
+import {NodeLink} from "../planner/types/goal/NodeLink.js";
+import {Objective} from "../planner/types/goal/Objective.js";
 
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -227,7 +228,7 @@ async function importFromZip(zipData) {
     checker.activate();
 }
 
-async function generatePlan() {
+export async function generatePlan() {
     const planner = new Planner();
 
     let dataclasses = dataModeler.get('elementRegistry').filter(element => is(element, 'od:Class'));
@@ -274,11 +275,28 @@ async function generatePlan() {
 
     let objectives = dependencyModeler.get('elementRegistry').filter(element => is(element, 'dep:Objective'));
     for (let objective of objectives) {
-        let objectiveModelReference = objective;
+        let boardReference = objectiveModeler.get('elementRegistry')
+            .filter(element => is(element, 'odDi:OdRootBoard'))
+            .filter(element => element.objectiveRef === objective);
+        let planeReference = boardReference.plane;
 
+        let boardElements = objectiveModeler.get('elementRegistry')
+            .filter(element => is(element, 'odDi:OdPlane'))
+            .filter(element => element.id === planeReference.id)
+            .filter(element => is(element, 'od:BoardElement'));
 
-        //planner.objectives.push(new Objective(, , objective.deadline));
+        let objectiveNodes = objectiveModeler.get('elementRegistry')
+            .filter(element => is(element, 'odDi:OdShape'))
+            .filter(element => boardElements.includes(element));
+
+        let nodeLinks = objectiveModeler.get('elementRegistry')
+            .filter(element => is(element, 'odDi:Link'))
+            .filter(element => boardElements.includes(element));
+
+        planner.objectives.push(new Objective(objectiveNodes, nodeLinks, objective.deadline));
     }
+
+    console.log(planner.dataclasses)
 
 }
 
