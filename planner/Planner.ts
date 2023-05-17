@@ -6,8 +6,22 @@ import {Objective} from "./types/goal/Objective";
 import {ExecutionLog} from "./types/output/ExecutionLog";
 import {Goal} from "./types/goal/Goal";
 import {Action} from "./types/fragments/Action";
+import {Dataclass} from "./types/Dataclass";
+import {InstanceLink} from "./types/executionState/InstanceLink";
+import {DataObjectReference} from "./types/fragments/DataObjectReference";
+import {Role} from "./types/Role";
+import {ObjectiveNode} from "./types/goal/ObjectiveNode";
+import {NodeLink} from "./types/goal/NodeLink";
 
 export class Planner {
+
+    dataclasses: Dataclass[];
+    activities: Activity[];
+    resources: Resource[];
+    roles: Role[];
+    objectiveNodes: ObjectiveNode[];
+    objectiveNodeLinks: NodeLink[];
+    objectives: Objective[];
     goal: Goal = new Goal();
 
     public simulateUntil(startState: ExecutionState, goal: Goal, activities: Action[], resources: Resource[]): ExecutionLog {
