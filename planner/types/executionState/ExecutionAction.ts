@@ -49,7 +49,7 @@ export class ExecutionAction {
     }
 
     private canFinish(): boolean {
-        return this.runningTime == this.action.duration;
+        return this.runningTime + 1 == this.action.duration;
     }
 
 
@@ -91,7 +91,7 @@ export class ExecutionAction {
     private getNewResources(executionState: ExecutionState): Resource[] {
         let oldResources = executionState.resources;
         let newResources = oldResources.map((resource) => {
-            if (resource === this.resource) {
+            if (resource.name === this.resource?.name && resource.roles === this.resource?.roles) {
                 return new Resource(resource.name, resource.roles, resource.capacity + this.action.NoP);
             } else {
                 return resource;

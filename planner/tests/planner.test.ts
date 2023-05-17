@@ -23,11 +23,13 @@ let cable: Dataclass;
 
 // Instances
 let mapleStreet: DataObjectInstance;
+let bakerStreet: DataObjectInstance;
 // let mapleStreetPainted: DataObjectInstance;
 // let mapleStreetTiled: DataObjectInstance;
 // let mapleStreetPlastered: DataObjectInstance;
 
 let mapleStreetInit: ExecutionDataObjectInstance;
+let bakerStreetInit: ExecutionDataObjectInstance;
 
 let wallNorthAvailable: DataObjectInstance;
 let wallNorthStanding: DataObjectInstance;
@@ -84,17 +86,20 @@ let outputSetBuyCables: IOSet;
 
 // Activities
 let paint: Action;
-let plaster: Activity;
-let putWalls: Activity;
-let tile: Activity;
-let lay: Activity;
-let buyCables: Activity;
+let plaster: Action;
+let putWalls: Action;
+let tile: Action;
+let lay: Action;
+let buyCables: Action;
 
 // ObjectiveNodes
 let objectiveNode: ObjectiveNode;
+let objectiveNode2: ObjectiveNode;
+let objectiveNode3: ObjectiveNode;
 
 // Objectives
 let objective: Objective;
+let objective2: Objective;
 
 // Goal
 let goal : Goal;
@@ -113,11 +118,13 @@ beforeEach(() => {
 
     //reset all instances
     mapleStreet = new DataObjectInstance("house:1", house);
+    bakerStreet = new DataObjectInstance("house:2", house);
     // mapleStreetPainted = new DataObjectInstance("house:1", house, "painted");
     // mapleStreetTiled = new DataObjectInstance("house:1", house, "tiled");
     // mapleStreetPlastered = new DataObjectInstance("house:1", house, "plastered");
 
     mapleStreetInit = new ExecutionDataObjectInstance(mapleStreet,"init");
+    bakerStreetInit = new ExecutionDataObjectInstance(bakerStreet,"init");
 
     // wallNorthAvailable = new DataObjectInstance("wall:1", wall, "available");
     // wallNorthStanding = new DataObjectInstance("wall:1", wall, "standing");
@@ -171,6 +178,8 @@ beforeEach(() => {
 
     //reset ObjectiveNodes
     objectiveNode = new ObjectiveNode(mapleStreet, ["painted"]);
+    objectiveNode2 = new ObjectiveNode(mapleStreet, ["tiled"]);
+    objectiveNode3 = new ObjectiveNode(bakerStreet, ["painted"]);
 
     //reset Objectives
     objective = new Objective([objectiveNode], []);
@@ -182,7 +191,7 @@ beforeEach(() => {
     paint = new Action("paint", 1, 1, painter, inputSetPaint, outputSetPaint);
     // plaster = new Activity("plaster", 1, 1, painter, [inputSetPlaster], outputSetPlaster);
     // putWalls = new Activity("putWalls", 1, 1, builder, [inputSetPutWalls], outputSetPutWalls);
-    // tile = new Activity("tile", 1, 1, tiler, [inputSetPaint, inputSetTile], outputSetTile);
+    tile = new Action("tile", 1, 1, tiler, inputSetTile, outputSetTile);
     // lay = new Activity("lay", 1, 1, electrician, [inputSetLay], outputSetLay);
     // buyCables = new Activity("buyCables", 1, 1, electrician, [], outputSetBuyCables);
 
@@ -251,5 +260,25 @@ describe('generating plans', () => {
         let outputAction = new OutputAction(paint,0,1,picasso,1,[mapleStreet],[mapleStreet]);
         let executionLog = new ExecutionLog([outputAction],[mapleStreet]);
         expect(planner.simulateUntil(currentState, goal, [paint], [picasso])).toEqual(executionLog);
+    });
+
+    test('plan two activities', () => {
+        let outputAction = new OutputAction(paint,0,1,picasso,1,[mapleStreet],[mapleStreet]);
+        let outputAction2 = new OutputAction(tile,1,2,michelangelo,1,[mapleStreet],[mapleStreet]);
+        let executionLog = new ExecutionLog([outputAction,outputAction2],[mapleStreet]);
+        objective2 = new Objective([objectiveNode2], []);
+        goal = new Goal([objective,objective2]);
+        currentState.resources = [picasso,michelangelo];
+        expect(planner.simulateUntil(currentState, goal, [paint,tile], [picasso,michelangelo])).toEqual(executionLog);
+    });
+
+    test('plan one activity on two objects', () => {
+        let outputAction = new OutputAction(paint,0,1,picasso,1,[mapleStreet],[mapleStreet]);
+        let outputAction2 = new OutputAction(paint,1,2,picasso,1,[bakerStreet],[bakerStreet]);
+        let executionLog = new ExecutionLog([outputAction,outputAction2],[mapleStreet,bakerStreet]);
+        objective = new Objective([objectiveNode,objectiveNode3], []);
+        currentState.availableExecutionDataObjectInstances = [mapleStreetInit,bakerStreetInit];
+        goal = new Goal([objective]);
+        expect(planner.simulateUntil(currentState, goal, [paint,tile], [picasso])).toEqual(executionLog);
     });
 });
