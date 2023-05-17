@@ -7,9 +7,9 @@ export class DataObjectReference {
     state: string;
     isList: boolean;
 
-    public constructor(dataclass: Dataclass, states: string,  isList: boolean) {
+    public constructor(dataclass: Dataclass, state: string,  isList: boolean) {
         this.dataclass = dataclass;
-        this.state = states;
+        this.state = state;
         this.isList = isList;
     }
 

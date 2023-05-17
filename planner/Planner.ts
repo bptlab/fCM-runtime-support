@@ -11,9 +11,11 @@ export class Planner {
     goal: Goal = new Goal();
 
     public simulateUntil(startState: ExecutionState, goal: Goal, activities: Action[], resources: Resource[]): ExecutionLog {
+        this.goal = goal;
+        this.setUpStartState(startState);
         let queue: ExecutionState[] = [startState];
         while (queue.length > 0) {
-            let test = queue.pop();
+            let test = queue.shift();
             let node;
             if (test) {
                 node = test;

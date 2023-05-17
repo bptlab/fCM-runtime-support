@@ -39,7 +39,11 @@ export class Action {
         let executionActions = []
         for (let input of inputs) {
             for (let resource of possibleResources) {
-                executionActions.push(this.getExecutionActionForInput(input, resource, executionState));
+                if (input.isArray()) {
+                    executionActions.push(this.getExecutionActionForInput(input, resource, executionState));
+                } else {
+                    executionActions.push(this.getExecutionActionForInput([input], resource, executionState));
+                }
             }
         }
         return executionActions;

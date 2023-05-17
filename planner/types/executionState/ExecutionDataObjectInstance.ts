@@ -8,4 +8,9 @@ export class ExecutionDataObjectInstance {
         this.dataObjectInstance = dataObjectInstance;
         this.state = state;
     }
+
+
+    public isArray() {
+        return false;
+    }
 }

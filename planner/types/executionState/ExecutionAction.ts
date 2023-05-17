@@ -64,12 +64,10 @@ export class ExecutionAction {
         }
     }
 
-    //todo hier weitermachen
     private finish(executionState: ExecutionState): ExecutionState {
         let availableDataObjects = executionState.availableExecutionDataObjectInstances.concat(this.outputList);
         let blockedDataObjects = this.getNewBlockedDataObjects(executionState);
         let instanceLinks = executionState.instanceLinks.concat(this.addedInstanceLinks);
-        //todo eher ab hier weitermachen
         let resources = this.getNewResources(executionState);
         let time = executionState.time;
         let runningActions = executionState.runningActions.filter((action) => action !== this);
@@ -104,7 +102,7 @@ export class ExecutionAction {
 
     private getNewActionHistory(executionState: ExecutionState): OutputAction[] {
         let oldActionHistory = executionState.actionHistory;
-        let newActionHistory = oldActionHistory.concat(new OutputAction(this.action, executionState.time - this.action.duration, executionState.time, this.resource, this.action.NoP, this.inputList, this.outputList));
+        let newActionHistory = oldActionHistory.concat(new OutputAction(this.action, executionState.time - this.action.duration, executionState.time, this.resource, this.action.NoP, this.inputList.map(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance), this.outputList.map(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance)));
         return newActionHistory;
     }
 
