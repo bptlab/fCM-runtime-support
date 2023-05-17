@@ -3,17 +3,19 @@ import {Activity} from "./types/fragments/Activity";
 import {Resource} from "./types/Resource";
 import {ExecutionState} from "./types/executionState/ExecutionState";
 import {Objective} from "./types/goal/Objective";
+import {ExecutionLog} from "./types/output/ExecutionLog";
+import {Goal} from "./types/goal/Goal";
+import {Action} from "./types/fragments/Action";
 
 export class Planner {
-    public simulateUntil(startState: ExecutionState, goal: Objective, activities: Activity[], resources: Resource[]): boolean {
-        let queue: ExecutionState[] = [];
-        if (goal.isFulfilledBy(startState)) {
-            return true;
-        } else {
-            queue.push(startState);
-        }
+    goal: Goal = new Goal();
+
+    public simulateUntil(startState: ExecutionState, goal: Goal, activities: Action[], resources: Resource[]): ExecutionLog {
+        this.goal = goal;
+        this.setUpStartState(startState);
+        let queue: ExecutionState[] = [startState];
         while (queue.length > 0) {
-            let test = queue.pop();
+            let test = queue.shift();
             let node;
             if (test) {
                 node = test;
@@ -21,14 +23,18 @@ export class Planner {
                 node = startState;
             }
             if (goal.isFulfilledBy(node)) {
-                return true;
+                return new ExecutionLog(node.actionHistory, node.allExecutionDataObjectInstances().map(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance));
             }
-            for (let activity of node.executableActivities(activities)) {
-                let simulatedState = startState;
-                activity.execute(simulatedState, simulatedState.dataObjectInstances);
-                queue.push(simulatedState);
-            }
+            let newNodes = node.getSuccessors(activities);
+
+            queue.push(...newNodes);
         }
-        return false;
+        return new ExecutionLog();
+    }
+
+    private setUpStartState(startState: ExecutionState){
+        this.goal.objectives.forEach(objective => {
+            startState.objectives.push(false);
+        });
     }
 }
