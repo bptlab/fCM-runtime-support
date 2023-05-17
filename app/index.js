@@ -228,8 +228,7 @@ async function importFromZip(zipData) {
     checker.activate();
 }
 
-export async function generatePlan() {
-    const planner = new Planner();
+export async function planButtonAction() {
 
     let dataclasses = dataModeler.get('elementRegistry').filter(element => is(element, 'od:Class'));
     for (let dataclass of dataclasses) {
@@ -241,11 +240,14 @@ export async function generatePlan() {
         planner.roles.push(new Role(role.name));
     }
 
-    let resources = resourceModeler.get('elementRegistry').filter(element => is(element, 'Resource'));
-    for (let resource of resources) {
-        let roleModelReference = resource.role;
-        let rolePlanReference = planner.roles.find(element => element.name === roleModelReference.name);
-        planner.resources.push(new Resource(resource.name, rolePlanReference, resources.capacity));
+    let resources = [];
+    let modelResources = resourceModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
+    for (let resource of modelResources.filter(element => is(element, 'rem:Resource'))) {
+        let rolePlanReferences = [];
+        for (let roleModelReference of resource.roles) {
+            rolePlanReferences.push(roles.find(element => element.name === roleModelReference.name));
+        }
+        resources.push(new Resource(resource.name, rolePlanReferences, resource.capacity));
     }
 
     /*
