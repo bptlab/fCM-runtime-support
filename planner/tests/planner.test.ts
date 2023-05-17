@@ -254,11 +254,12 @@ beforeEach(() => {
 
 describe('generating plans', () => {
 
-    let planner = new Planner();
+
 
     test('plan one activity', () => {
         let outputAction = new OutputAction(paint,0,1,picasso,1,[mapleStreet],[mapleStreet]);
         let executionLog = new ExecutionLog([outputAction],[mapleStreet]);
+        let planner = new Planner(currentState,goal,[paint]);
         expect(planner.simulateUntil(currentState, goal, [paint], [picasso])).toEqual(executionLog);
     });
 
@@ -269,6 +270,7 @@ describe('generating plans', () => {
         objective2 = new Objective([objectiveNode2], []);
         goal = new Goal([objective,objective2]);
         currentState.resources = [picasso,michelangelo];
+        let planner = new Planner(currentState,goal,[paint,tile]);
         expect(planner.simulateUntil(currentState, goal, [paint,tile], [picasso,michelangelo])).toEqual(executionLog);
     });
 
@@ -279,6 +281,7 @@ describe('generating plans', () => {
         objective = new Objective([objectiveNode,objectiveNode3], []);
         currentState.availableExecutionDataObjectInstances = [mapleStreetInit,bakerStreetInit];
         goal = new Goal([objective]);
+        let planner = new Planner(currentState,goal,[paint,tile]);
         expect(planner.simulateUntil(currentState, goal, [paint,tile], [picasso])).toEqual(executionLog);
     });
 });

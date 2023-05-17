@@ -7,14 +7,17 @@ class Objective {
         this.objectiveLinks = links;
         this.deadline = deadline;
     }
-    isFulfilledBy(state) {
+    isFulfilledBy(executionState) {
+        if (this.deadline && executionState.time > this.deadline) {
+            return false;
+        }
         for (let dataObjectNode of this.dataObjectNodes) {
-            if (!state.dataObjectInstances.some(dataObjectInstance => dataObjectNode.isMatchedBy(dataObjectInstance))) {
+            if (!executionState.allExecutionDataObjectInstances().some(executionDataObjectInstance => dataObjectNode.isMatchedBy(executionDataObjectInstance))) {
                 return false;
             }
         }
-        for (let objectiveLinks of this.objectiveLinks) {
-            if (!state.links.some(instanceLink => objectiveLinks.isMatchedBy(instanceLink))) {
+        for (let objectiveLink of this.objectiveLinks) {
+            if (!executionState.instanceLinks.some(instanceLink => objectiveLink.isMatchedBy(instanceLink))) {
                 return false;
             }
         }

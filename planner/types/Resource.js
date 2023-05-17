@@ -2,13 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Resource = void 0;
 class Resource {
-    constructor(name, role, capacity) {
+    constructor(name, roles = [], capacity) {
         this.name = name;
-        this.role = role;
+        this.roles = roles;
         this.capacity = capacity;
     }
     satisfies(role, NoP) {
-        return role === this.role && NoP <= this.capacity;
+        if (!role) {
+            return true;
+        }
+        else {
+            return this.roles.includes(role) && NoP <= this.capacity;
+        }
     }
 }
 exports.Resource = Resource;

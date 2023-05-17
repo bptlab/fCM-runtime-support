@@ -2,10 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataObjectInstance = void 0;
 class DataObjectInstance {
-    constructor(name, dataclass, state) {
+    constructor(name, dataclass) {
         this.name = name;
         this.dataclass = dataclass;
-        this.state = state;
     }
 }
 exports.DataObjectInstance = DataObjectInstance;

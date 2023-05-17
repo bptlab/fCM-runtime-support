@@ -7,7 +7,7 @@ class NodeLink {
         this.second = second;
     }
     isMatchedBy(instanceLink) {
-        return (this.first.name === instanceLink.first.name && this.second.name === instanceLink.second.name) || (this.second.name === instanceLink.first.name && this.first.name === instanceLink.second.name);
+        return (this.first.dataObjectInstance === instanceLink.first && this.second.dataObjectInstance === instanceLink.second) || (this.second.dataObjectInstance === instanceLink.first && this.first.dataObjectInstance === instanceLink.second);
     }
 }
 exports.NodeLink = NodeLink;

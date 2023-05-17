@@ -34,6 +34,13 @@ import {Role} from "../planner/types/Role.js";
 import {ObjectiveNode} from "../planner/types/goal/ObjectiveNode.js";
 import {NodeLink} from "../planner/types/goal/NodeLink.js";
 import {Objective} from "../planner/types/goal/Objective.js";
+import {DataObjectInstance} from "../planner/types/executionState/DataObjectInstance.js";
+import {Goal} from "../planner/types/goal/Goal.js";
+import {Action} from "../planner/types/fragments/Action.js";
+import {DataObjectReference} from "../planner/types/fragments/DataObjectReference";
+import {IOSet} from "../planner/types/fragments/IOSet";
+import {ExecutionState} from "../planner/types/executionState/ExecutionState";
+import {ExecutionDataObjectInstance} from "../planner/types/executionState/ExecutionDataObjectInstance";
 
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -230,14 +237,16 @@ async function importFromZip(zipData) {
 
 export async function planButtonAction() {
 
-    let dataclasses = dataModeler.get('elementRegistry').filter(element => is(element, 'od:Class'));
-    for (let dataclass of dataclasses) {
-        planner.dataclasses.push(new Dataclass(dataclass.name));
+    let dataclasses = [];
+    let modelDataclasses = dataModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
+    for (let dataclass of modelDataclasses.filter(element => is(element, 'od:Class'))) {
+        dataclasses.push(new Dataclass(dataclass.name));
     }
 
-    let roles = roleModeler.get('elementRegistry').filter(element => is(element, 'Role'));
-    for (let role of roles) {
-        planner.roles.push(new Role(role.name));
+    let roles = [];
+    let modelRoles = roleModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
+    for (let role of modelRoles.filter(element => is(element, 'rom:Role'))) {
+       roles.push(new Role(role.name));
     }
 
     let resources = [];
@@ -250,56 +259,59 @@ export async function planButtonAction() {
         resources.push(new Resource(resource.name, rolePlanReferences, resource.capacity));
     }
 
-    /*
-    let activities = fragmentModeler.get('elementRegistry').filter(element => is(element, 'bpmn:Task'));
-    for (let activity of activities) {
-        let input;
-        let output;
-        planner.activities.push(new Activity(activity.name, activity.duration, activity.NoP, activity.role, input, output));
-    }
-    */
-
-    let objectiveNodes = objectiveModeler.get('elementRegistry').filter(element => is(element, 'om:Object'));
-    for (let objectiveNode of objectiveNodes) {
-        let dataclassModelReference = objectiveNode.dataclass;
-        let dataclassPlanReference = planner.dataclasses.find(element => element.name === dataclassModelReference.name);
-        planner.objectiveNodes.push(new ObjectiveNode(objectiveNode.name, dataclassPlanReference, objectiveNode.states));
+    let dataObjectInstances = [];
+    let modelDataObjectInstances = objectiveModeler._definitions.get('objectInstances');
+    for (let instance of modelDataObjectInstances.filter(element => is(element, 'om:ObjectInstance'))) {
+        dataObjectInstances.push(new DataObjectInstance(instance.name, dataclasses.find(element => element.name === instance.classRef.name)))
     }
 
-    let objectiveNodeLinks = objectiveModeler.get('elementRegistry').filter(element => is(element, 'om:Link'));
-    for (let objectiveNodeLink of objectiveNodeLinks) {
-        let startObjectiveNodeLinkModelReference = objectiveNodeLink.sourceRef;
-        let startObjectiveNodeLinkPlanReference = planner.objectiveNodes.find(element => element.name === startObjectiveNodeLinkModelReference.name);
-        let endObjectiveNodeLinkModelReference = objectiveNodeLink.targetRef;
-        let endObjectiveNodeLinkPlanReference = planner.objectiveNodes.find(element => element.name === endObjectiveNodeLinkModelReference.name);
-        planner.objectiveNodeLinks.push(new NodeLink(startObjectiveNodeLinkPlanReference, endObjectiveNodeLinkPlanReference));
+    let objectives = []; //TODO: ensure order of objectives + links
+    let modelObjectives = objectiveModeler._definitions.get('rootElements');
+    for (let i = 0; i < modelObjectives.length; i++) {
+        let objectiveNodes = [];
+        for (let object of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Object'))) {
+            objectiveNodes.push(new ObjectiveNode(dataObjectInstances.find(element => element.name === object.instance.name && element.dataclass.name === object.classRef.name), object.states.map(element => element.name)));
+        }
+        let objectiveLinks = [];
+        for (let links of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Link'))) {
+
+        }
+        objectives.push(new Objective(objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
     }
 
-    let objectives = dependencyModeler.get('elementRegistry').filter(element => is(element, 'dep:Objective'));
-    for (let objective of objectives) {
-        let boardReference = objectiveModeler.get('elementRegistry')
-            .filter(element => is(element, 'odDi:OdRootBoard'))
-            .filter(element => element.objectiveRef === objective);
-        let planeReference = boardReference.plane;
+    let goal = new Goal(objectives);
 
-        let boardElements = objectiveModeler.get('elementRegistry')
-            .filter(element => is(element, 'odDi:OdPlane'))
-            .filter(element => element.id === planeReference.id)
-            .filter(element => is(element, 'od:BoardElement'));
-
-        let objectiveNodes = objectiveModeler.get('elementRegistry')
-            .filter(element => is(element, 'odDi:OdShape'))
-            .filter(element => boardElements.includes(element));
-
-        let nodeLinks = objectiveModeler.get('elementRegistry')
-            .filter(element => is(element, 'odDi:Link'))
-            .filter(element => boardElements.includes(element));
-
-        planner.objectives.push(new Objective(objectiveNodes, nodeLinks, objective.deadline));
+    let startState = objectiveModeler._definitions.get('rootElements').find(element => element.id === "Board");
+    let executionDataObjectInstances = [];
+    for (let executionDataObjectInstance of startState.get('boardElements').filter((element) => is(element, 'om:Object'))) {
+        executionDataObjectInstances.push(new ExecutionDataObjectInstance(dataObjectInstances.find(element => element.name === executionDataObjectInstance.instance.name && element.dataclass.name === executionDataObjectInstance.classRef.name), executionDataObjectInstance.states[0].name));
+    }
+    let instanceLinks = [];
+    for (let instanceLinks of startState.get('boardElements').flat(1).filter((element) => is(element, 'om:Link'))) {
+        // TODO
     }
 
-    console.log(planner.dataclasses)
+    let currentState = new ExecutionState(executionDataObjectInstances, [], instanceLinks, resources, 0, [], [], []);
+    // TODO: finish actions
+    let actions = [];
+    let modelactions = fragmentModeler._definitions.rootElements[0].flowElements ;
+    for (let action of modelactions.filter(element => is(element, 'bpmn:Task'))) {
+        let inputSet = [];
+        for (let dataObjectReference of action.businessObject.dataInputAssociations) {
+                inputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.sourceRef[0].dataclass.name), dataObjectReference.sourceRef[0].states.map(element => element.name), false));
+        }
+        let outputSet = [];
+        for (let dataObjectReference of action.businessObject.dataOutputAssociations) {
+            inputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.targetRef[0].dataclass.name), dataObjectReference.targetRef[0].states.map(element => element.name), false));
+        }
+        actions.push(new Action(action.name, action.duration, action.NoP, roles.find(element => element.name === action.role.name), new IOSet(inputSet), new IOSet(outputSet)))
+    }
 
+
+
+
+    const planner = new Planner(currentState, goal, actions);
+    planner.generatePlan();
 }
 
 // IO Buttons
@@ -325,7 +337,7 @@ async function displayFileName(zipName) {
 };
 
 document.getElementById('planningButton').addEventListener('click', () => {
-    alert("This is not possible right now.");
+    planButtonAction();
 });
 
 async function navigationDropdown() {
