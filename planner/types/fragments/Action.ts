@@ -34,7 +34,7 @@ export class Action {
             let matchingInstances = executionState.availableExecutionDataObjectInstances.filter(executionDataObjectInstance => dataObjectReference.isMatchedBy(executionDataObjectInstance));
             possibleInstances.push(matchingInstances);
         }
-        let inputs = cartesianProduct(...possibleInstances);
+        let inputs = cartesianProduct(...possibleInstances); // TODO Deal with input set
         let possibleResources = executionState.resources.filter(resource => resource.satisfies(this.role, this.NoP))
         let executionActions = []
         for (let input of inputs) {

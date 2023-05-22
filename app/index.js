@@ -28,7 +28,6 @@ import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 import {Planner} from "../planner/Planner.js";
 import {is} from "bpmn-js/lib/util/ModelUtil.js";
 import {Dataclass} from "../planner/types/Dataclass.js";
-import {Activity} from "../planner/types/fragments/Activity";
 import {Resource} from "../planner/types/Resource.js";
 import {Role} from "../planner/types/Role.js";
 import {ObjectiveNode} from "../planner/types/goal/ObjectiveNode.js";
@@ -333,7 +332,7 @@ document.getElementById('saveButton').addEventListener('click', () => exportToZi
 
 async function displayFileName(zipName) {
     document.getElementById("fileName").innerHTML = zipName;
-};
+}
 
 document.getElementById('planningButton').addEventListener('click', () => {
     planButtonAction();
@@ -362,8 +361,6 @@ async function navigationDropdown() {
         if (event.target === selectOlcComponent || event.target === selectedOlcSpan) {
             repopulateDropdown();
             showSelectOlcMenu();
-        } else {
-            return;
         }
     });
 
@@ -406,7 +403,7 @@ async function navigationDropdown() {
     selectOlcComponent.showValue(currentModeler);
     selectOlcComponent.appendChild(selectedOlcSpan);
     buttonBar.appendChild(selectOlcComponent);
-};
+}
 
 navigationDropdown();
 
