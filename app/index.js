@@ -40,6 +40,7 @@ import {DataObjectReference} from "../planner/types/fragments/DataObjectReferenc
 import {IOSet} from "../planner/types/fragments/IOSet";
 import {ExecutionState} from "../planner/types/executionState/ExecutionState";
 import {ExecutionDataObjectInstance} from "../planner/types/executionState/ExecutionDataObjectInstance";
+import {InstanceLink} from "../planner/types/executionState/InstanceLink";
 
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -264,7 +265,7 @@ export async function planButtonAction() {
         dataObjectInstances.push(new DataObjectInstance(instance.name, dataclasses.find(element => element.name === instance.classRef.name)))
     }
 
-    let objectives = []; //TODO: ensure order of objectives + links
+    let objectives = []; //TODO: ensure order of objectives
     let modelObjectives = objectiveModeler._definitions.get('rootElements');
     for (let i = 0; i < modelObjectives.length; i++) {
         let objectiveNodes = [];
@@ -272,8 +273,8 @@ export async function planButtonAction() {
             objectiveNodes.push(new ObjectiveNode(dataObjectInstances.find(element => element.name === object.instance.name && element.dataclass.name === object.classRef.name), object.states.map(element => element.name)));
         }
         let objectiveLinks = [];
-        for (let links of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Link'))) {
-
+        for (let link of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Link'))) {
+            objectiveLinks.push(new NodeLink(objectiveNodes.find(element => element.dataObjectInstance.name === link.sourceRef.instance.name && element.dataObjectInstance.dataclass.name === link.sourceRef.classRef.name), objectiveNodes.find(element => element.dataObjectInstance.name === link.targetRef.instance.name && element.dataObjectInstance.dataclass.name === link.targetRef.classRef.name)));
         }
         objectives.push(new Objective(objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
     }
@@ -286,11 +287,12 @@ export async function planButtonAction() {
         executionDataObjectInstances.push(new ExecutionDataObjectInstance(dataObjectInstances.find(element => element.name === executionDataObjectInstance.instance.name && element.dataclass.name === executionDataObjectInstance.classRef.name), executionDataObjectInstance.states[0].name));
     }
     let instanceLinks = [];
-    for (let instanceLinks of startState.get('boardElements').flat(1).filter((element) => is(element, 'om:Link'))) {
-        // TODO
+    for (let instanceLink of startState.get('boardElements').filter((element) => is(element, 'om:Link'))) {
+        instanceLinks.push(new InstanceLink(executionDataObjectInstances.find(element => element.dataObjectInstance.name === instanceLink.sourceRef.instance.name && element.dataObjectInstance.dataclass.name === instanceLink.sourceRef.classRef.name), executionDataObjectInstances.find(element => element.dataObjectInstance.name === instanceLink.targetRef.instance.name && element.dataObjectInstance.dataclass.name === instanceLink.targetRef.classRef.name)));
     }
 
     let currentState = new ExecutionState(executionDataObjectInstances, [], instanceLinks, resources, 0, [], [], []);
+
     let actions = [];
     let modelActions = fragmentModeler._definitions.get('rootElements')[0].get('flowElements');
     for (let action of modelActions.filter(element => is(element, 'bpmn:Task'))) {
@@ -304,9 +306,6 @@ export async function planButtonAction() {
         }
         actions.push(new Action(action.name, action.duration, action.NoP, roles.find(element => element.name === action.role.name), new IOSet(inputSet), new IOSet(outputSet)))
     }
-
-
-
 
     const planner = new Planner(currentState, goal, actions);
     planner.generatePlan();
