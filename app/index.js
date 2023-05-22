@@ -292,17 +292,16 @@ export async function planButtonAction() {
     }
 
     let currentState = new ExecutionState(executionDataObjectInstances, [], instanceLinks, resources, 0, [], [], []);
-    // TODO: finish actions
     let actions = [];
-    let modelactions = fragmentModeler._definitions.rootElements[0].flowElements ;
-    for (let action of modelactions.filter(element => is(element, 'bpmn:Task'))) {
+    let modelActions = fragmentModeler._definitions.get('rootElements')[0].get('flowElements');
+    for (let action of modelActions.filter(element => is(element, 'bpmn:Task'))) {
         let inputSet = [];
-        for (let dataObjectReference of action.businessObject.dataInputAssociations) {
-                inputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.sourceRef[0].dataclass.name), dataObjectReference.sourceRef[0].states.map(element => element.name), false));
+        for (let dataObjectReference of action.get('dataInputAssociations')) {
+            inputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.get('sourceRef')[0].dataclass.name), dataObjectReference.get('sourceRef')[0].states[0].name, false));
         }
         let outputSet = [];
-        for (let dataObjectReference of action.businessObject.dataOutputAssociations) {
-            inputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.targetRef[0].dataclass.name), dataObjectReference.targetRef[0].states.map(element => element.name), false));
+        for (let dataObjectReference of action.get('dataOutputAssociations')) {
+            outputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.get('targetRef').dataclass.name), dataObjectReference.get('targetRef').states[0].name, false));
         }
         actions.push(new Action(action.name, action.duration, action.NoP, roles.find(element => element.name === action.role.name), new IOSet(inputSet), new IOSet(outputSet)))
     }
