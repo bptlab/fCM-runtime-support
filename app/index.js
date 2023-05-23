@@ -25,7 +25,6 @@ import conferenceTerminationCondition from '../resources/conferenceModel/termina
 import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
-import {parseObjects} from "../planner/parser/ModelObjectParser";
 import {exportExecutionPlan} from "../dist/excel/excel.js";
 
 const LOAD_DUMMY = false; // Set to true to load conference example data

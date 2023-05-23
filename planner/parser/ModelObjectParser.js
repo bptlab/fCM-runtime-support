@@ -16,19 +16,32 @@ import {Planner} from "../../dist/Planner";
 import {Dataclass} from "../../dist/types/Dataclass";
 
 export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler) {
+    let currentState = getCurrentState(objectiveModeler, getDataObjectInstances(objectiveModeler, getDataclasses(dataModeler)), getResources(resourceModeler, getRoles(roleModeler)));
+    let goal = new Goal(getObjectives(objectiveModeler, dependencyModeler, getDataObjectInstances(objectiveModeler, getDataclasses(dataModeler))));
+    let actions = getActions(fragmentModeler, getDataclasses(dataModeler), getRoles(roleModeler));
 
+    return new Planner(currentState, goal, actions);
+}
+
+function getDataclasses(dataModeler) {
     let dataclasses = [];
     let modelDataclasses = dataModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
     for (let dataclass of modelDataclasses.filter(element => is(element, 'od:Class'))) {
         dataclasses.push(new Dataclass(dataclass.name));
     }
+    return dataclasses;
+}
 
+function getRoles(roleModeler) {
     let roles = [];
     let modelRoles = roleModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
     for (let role of modelRoles.filter(element => is(element, 'rom:Role'))) {
         roles.push(new Role(role.name));
     }
+    return roles;
+}
 
+function getResources(resourceModeler, roles) {
     let resources = [];
     let modelResources = resourceModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
     for (let resource of modelResources.filter(element => is(element, 'rem:Resource'))) {
@@ -38,13 +51,19 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
         }
         resources.push(new Resource(resource.name, rolePlanReferences, parseInt(resource.capacity)));
     }
+    return resources
+}
 
+function getDataObjectInstances(objectiveModeler, dataclasses) {
     let dataObjectInstances = [];
     let modelDataObjectInstances = objectiveModeler._definitions.get('objectInstances');
     for (let instance of modelDataObjectInstances.filter(element => is(element, 'om:ObjectInstance'))) {
         dataObjectInstances.push(new DataObjectInstance(instance.name, dataclasses.find(element => element.name === instance.classRef.name)))
     }
+    return dataObjectInstances
+}
 
+function getObjectives(objectiveModeler, dependencyModeler, dataObjectInstances) {
     let objectives = [];
     let dependencyLinks = dependencyModeler._definitions.get('goals')[0].get('Elements').filter(element => is(element, 'dep:Dependency'));
     let modelObjectives = objectiveModeler._definitions.get('rootElements');
@@ -75,9 +94,10 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
         }
 
     }
+    return objectives
+}
 
-    let goal = new Goal(objectives);
-
+function getCurrentState(objectiveModeler, dataObjectInstances, resources) {
     let startState = objectiveModeler._definitions.get('rootElements').find(element => element.id === "Board");
     let executionDataObjectInstances = [];
     for (let executionDataObjectInstance of startState.get('boardElements').filter((element) => is(element, 'om:Object'))) {
@@ -87,8 +107,10 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
     for (let instanceLink of startState.get('boardElements').filter((element) => is(element, 'om:Link'))) {
         instanceLinks.push(new InstanceLink(executionDataObjectInstances.find(element => element.dataObjectInstance.name === instanceLink.sourceRef.instance.name && element.dataObjectInstance.dataclass.name === instanceLink.sourceRef.classRef.name), executionDataObjectInstances.find(element => element.dataObjectInstance.name === instanceLink.targetRef.instance.name && element.dataObjectInstance.dataclass.name === instanceLink.targetRef.classRef.name)));
     }
-    let currentState = new ExecutionState(executionDataObjectInstances, [], instanceLinks, resources, 0, [], [], []);
+    return new ExecutionState(executionDataObjectInstances, [], instanceLinks, resources, 0, [], [], []);
+}
 
+function getActions(fragmentModeler, dataclasses, roles) {
     let actions = [];
     let modelActions = fragmentModeler._definitions.get('rootElements')[0].get('flowElements');
     for (let action of modelActions.filter(element => is(element, 'bpmn:Task'))) {
@@ -102,6 +124,5 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
         }
         actions.push(new Action(action.name, parseInt(action.duration), parseInt(action.NoP), roles.find(element => element.name === action.role.name), new IOSet(inputSet), new IOSet(outputSet)))
     }
-
-    return new Planner(currentState, goal, actions);
+    return actions
 }
