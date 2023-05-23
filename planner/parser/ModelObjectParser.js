@@ -15,7 +15,7 @@ import {Action} from "../../dist/types/fragments/Action";
 import {Planner} from "../../dist/Planner";
 import {Dataclass} from "../../dist/types/Dataclass";
 
-export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, roleModeler, resourceModeler) {
+export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler) {
 
     let dataclasses = [];
     let modelDataclasses = dataModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
