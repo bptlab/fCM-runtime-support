@@ -27,33 +27,6 @@ export class Planner {
                 node = this.startState;
             }
             if (this.goal.isFulfilledBy(node)) {
-                return new ExecutionLog(node.actionHistory, node.allExecutionDataObjectInstances().map(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance), node.resources);
-            }
-            let newNodes = node.getSuccessors(this.actions);
-
-            queue.push(...newNodes);
-    startState: ExecutionState;
-    goal: Goal;
-    actions: Action[];
-
-    public constructor(startState: ExecutionState, goal: Goal, actions: Action[]) {
-        this.startState = startState;
-        this.goal = goal;
-        this.actions = actions;
-    }
-
-    public generatePlan(): ExecutionLog {
-        this.setUpStartState(this.startState);
-        let queue: ExecutionState[] = [this.startState];
-        while (queue.length > 0) {
-            let test = queue.shift();
-            let node;
-            if (test) {
-                node = test;
-            } else {
-                node = this.startState;
-            }
-            if (this.goal.isFulfilledBy(node)) {
                 return new ExecutionLog(node.actionHistory, node.allExecutionDataObjectInstances().map(executionDataObjectInstance => executionDataObjectInstance.dataObjectInstance));
             }
             let newNodes = node.getSuccessors(this.actions);
