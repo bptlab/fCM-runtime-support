@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Objective = void 0;
 class Objective {
-    constructor(dataObjectNodes, links, deadline = null) {
+    constructor(id, dataObjectNodes, links, deadline = null) {
+        this.id = id;
         this.dataObjectNodes = dataObjectNodes;
         this.objectiveLinks = links;
         this.deadline = deadline;

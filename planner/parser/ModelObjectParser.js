@@ -15,7 +15,7 @@ import {Action} from "../types/fragments/Action";
 import {Planner} from "../Planner";
 import {Dataclass} from "../types/Dataclass";
 
-export async function parseObjects(dataModeler, fragmentModeler, objectiveModeler, roleModeler, resourceModeler) {
+export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler) {
 
     let dataclasses = [];
     let modelDataclasses = dataModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
@@ -45,9 +45,13 @@ export async function parseObjects(dataModeler, fragmentModeler, objectiveModele
         dataObjectInstances.push(new DataObjectInstance(instance.name, dataclasses.find(element => element.name === instance.classRef.name)))
     }
 
-    let objectives = []; //TODO: ensure order of objectives
+    let objectives = [];
+    let dependencyLinks = dependencyModeler._definitions.get('goals')[0].get('Elements').filter(element => is(element, 'dep:Dependency'));
     let modelObjectives = objectiveModeler._definitions.get('rootElements');
     for (let i = 0; i < modelObjectives.length; i++) {
+        let objectiveBoardId = modelObjectives[i].id;
+        let objectiveMega = objectiveModeler._definitions.get('rootBoards').find(element => element.plane.get('boardElement').id === objectiveBoardId);
+        let objectiveId = objectiveMega.objectiveRef.id;
         let objectiveNodes = [];
         for (let object of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Object'))) {
             objectiveNodes.push(new ObjectiveNode(dataObjectInstances.find(element => element.name === object.instance.name && element.dataclass.name === object.classRef.name), object.states.map(element => element.name)));
@@ -56,7 +60,20 @@ export async function parseObjects(dataModeler, fragmentModeler, objectiveModele
         for (let link of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Link'))) {
             objectiveLinks.push(new NodeLink(objectiveNodes.find(element => element.dataObjectInstance.name === link.sourceRef.instance.name && element.dataObjectInstance.dataclass.name === link.sourceRef.classRef.name), objectiveNodes.find(element => element.dataObjectInstance.name === link.targetRef.instance.name && element.dataObjectInstance.dataclass.name === link.targetRef.classRef.name)));
         }
-        objectives.push(new Objective(objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+        if (objectiveId === 'start_state') {
+            objectives.push(new Objective(objectiveId, objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+        }
+        else {
+            let previousObjectiveId = dependencyLinks.find(element => element.targetObjective.id === objectiveId).sourceObjective.id;
+            let index = objectives.findIndex(element => element.id === previousObjectiveId);
+            if (index === -1) {
+                objectives.push(new Objective(objectiveId, objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+            }
+            else {
+                objectives.splice(index + 1 , 0, new Objective(objectiveId, objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+            }
+        }
+
     }
 
     let goal = new Goal(objectives);

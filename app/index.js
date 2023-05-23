@@ -221,7 +221,7 @@ async function importFromZip(zipData) {
 }
 
 export async function planButtonAction() {
-    const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, roleModeler, resourceModeler);
+    const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
     planner.generatePlan();
 }
 
