@@ -26,6 +26,7 @@ import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {parseObjects} from "../planner/parser/ModelObjectParser";
+import {exportExecutionPlan} from "../dist/excel/excel.js";
 
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -221,8 +222,22 @@ async function importFromZip(zipData) {
 }
 
 export async function planButtonAction() {
-    const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
-    planner.generatePlan();
+    const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, roleModeler, resourceModeler);
+    let executionLog = planner.generatePlan();
+    let blob = await exportExecutionPlan(executionLog);
+
+    const url = window.URL.createObjectURL(blob);
+
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Execution Plan.xlsx';
+
+    // Programmatically click the link to initiate the download
+    link.click();
+
+    // Clean up the temporary URL
+    window.URL.revokeObjectURL(url);
 }
 
 // IO Buttons

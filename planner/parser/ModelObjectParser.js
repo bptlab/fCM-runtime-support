@@ -1,21 +1,21 @@
 import {is} from "bpmn-js/lib/util/ModelUtil";
-import {ExecutionDataObjectInstance} from "../types/executionState/ExecutionDataObjectInstance";
-import {InstanceLink} from "../types/executionState/InstanceLink";
-import {ExecutionState} from "../types/executionState/ExecutionState";
-import {DataObjectReference} from "../types/fragments/DataObjectReference";
-import {IOSet} from "../types/fragments/IOSet";
-import {Resource} from "../types/Resource";
-import {DataObjectInstance} from "../types/executionState/DataObjectInstance";
-import {Goal} from "../types/goal/Goal";
-import {Role} from "../types/Role";
-import {NodeLink} from "../types/goal/NodeLink";
-import {ObjectiveNode} from "../types/goal/ObjectiveNode";
-import {Objective} from "../types/goal/Objective";
-import {Action} from "../types/fragments/Action";
-import {Planner} from "../Planner";
-import {Dataclass} from "../types/Dataclass";
+import {ExecutionDataObjectInstance} from "../../dist/types/executionState/ExecutionDataObjectInstance";
+import {InstanceLink} from "../../dist/types/executionState/InstanceLink";
+import {ExecutionState} from "../../dist/types/executionState/ExecutionState";
+import {DataObjectReference} from "../../dist/types/fragments/DataObjectReference";
+import {IOSet} from "../../dist/types/fragments/IOSet";
+import {Resource} from "../../dist/types/Resource";
+import {DataObjectInstance} from "../../dist/types/executionState/DataObjectInstance";
+import {Goal} from "../../dist/types/goal/Goal";
+import {Role} from "../../dist/types/Role";
+import {NodeLink} from "../../dist/types/goal/NodeLink";
+import {ObjectiveNode} from "../../dist/types/goal/ObjectiveNode";
+import {Objective} from "../../dist/types/goal/Objective";
+import {Action} from "../../dist/types/fragments/Action";
+import {Planner} from "../../dist/Planner";
+import {Dataclass} from "../../dist/types/Dataclass";
 
-export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler) {
+export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, roleModeler, resourceModeler) {
 
     let dataclasses = [];
     let modelDataclasses = dataModeler._definitions.get('rootElements').map(element => element.get('boardElements')).flat();
@@ -36,7 +36,7 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
         for (let roleModelReference of resource.roles) {
             rolePlanReferences.push(roles.find(element => element.name === roleModelReference.name));
         }
-        resources.push(new Resource(resource.name, rolePlanReferences, resource.capacity));
+        resources.push(new Resource(resource.name, rolePlanReferences, parseInt(resource.capacity)));
     }
 
     let dataObjectInstances = [];
@@ -61,16 +61,16 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
             objectiveLinks.push(new NodeLink(objectiveNodes.find(element => element.dataObjectInstance.name === link.sourceRef.instance.name && element.dataObjectInstance.dataclass.name === link.sourceRef.classRef.name), objectiveNodes.find(element => element.dataObjectInstance.name === link.targetRef.instance.name && element.dataObjectInstance.dataclass.name === link.targetRef.classRef.name)));
         }
         if (objectiveId === 'start_state') {
-            objectives.push(new Objective(objectiveId, objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+            objectives.push(new Objective(objectiveId, objectiveNodes, objectiveLinks, parseInt(objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date)));
         }
         else {
             let previousObjectiveId = dependencyLinks.find(element => element.targetObjective.id === objectiveId).sourceObjective.id;
             let index = objectives.findIndex(element => element.id === previousObjectiveId);
             if (index === -1) {
-                objectives.push(new Objective(objectiveId, objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+                objectives.push(new Objective(objectiveId, objectiveNodes, objectiveLinks, parseInt(objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date)));
             }
             else {
-                objectives.splice(index + 1 , 0, new Objective(objectiveId, objectiveNodes, objectiveLinks, objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date));
+                objectives.splice(index + 1 , 0, new Objective(objectiveId, objectiveNodes, objectiveLinks, parseInt(objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date)));
             }
         }
 
@@ -100,7 +100,7 @@ export function parseObjects(dataModeler, fragmentModeler, objectiveModeler, dep
         for (let dataObjectReference of action.get('dataOutputAssociations')) {
             outputSet.push(new DataObjectReference(dataclasses.find(element => element.name === dataObjectReference.get('targetRef').dataclass.name), dataObjectReference.get('targetRef').states[0].name, false));
         }
-        actions.push(new Action(action.name, action.duration, action.NoP, roles.find(element => element.name === action.role.name), new IOSet(inputSet), new IOSet(outputSet)))
+        actions.push(new Action(action.name, parseInt(action.duration), parseInt(action.NoP), roles.find(element => element.name === action.role.name), new IOSet(inputSet), new IOSet(outputSet)))
     }
 
     return new Planner(currentState, goal, actions);
