@@ -7,6 +7,7 @@ import DataModelModeler from './lib/datamodelmodeler/Modeler';
 import ObjectiveModeler from './lib/objectivemodeler/OmModeler';
 import DependencyModeler from './lib/dependencymodeler/DependencyModeler';
 import RoleModeler from './lib/rolemodeler/RoleModeler';
+import RemModeler from './lib/resourcemodeler/RemModeler';
 
 import $ from 'jquery';
 import Mediator from './lib/mediator/Mediator';
@@ -25,7 +26,7 @@ import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {LOAD_DUMMY, SHOW_DEBUG_BUTTONS, ENABLE_CONSTRUCTION_MODE} from './featureFlags'
-
+import {exportExecutionPlan} from "../dist/excel/excel.js";
 
 var mediator = new Mediator();
 window.mediator = mediator;
@@ -92,6 +93,17 @@ var roleModeler = new RoleModeler({
     }]
 });
 
+var resourceModeler = new RemModeler({
+    container: '#resourcemodel-canvas',
+    keyboard: {
+        bindTo: document.querySelector('#resourcemodel-canvas')
+    },
+    additionalModules: [{
+        __init__: ['mediator'],
+        mediator: ['type', mediator.ResourceModelerHook]
+    }]
+});
+
 var terminationConditionModeler = new TerminationConditionModeler(
     '#terminationcondition-canvas'
 );
@@ -120,11 +132,12 @@ async function loadDebugData() {
 async function createNewDiagram() {
     try {
         checker.deactivate();
-        await roleModeler.createDiagram();
         await dependencyModeler.createNew();
-        await dataModeler.importXML(newDatamodel);
         await fragmentModeler.importXML(diagramXML);
         await olcModeler.createNew();
+        await dataModeler.importXML(newDatamodel);
+        await roleModeler.createDiagram();
+        await resourceModeler.createDiagram();
         await objectiveModeler.createDiagram();
         terminationConditionModeler.createNew();
         if (LOAD_DUMMY) {
@@ -162,6 +175,8 @@ async function exportToZip() {
     zip.file('objectiveModel.xml', objectiveModel);
     const olcs = (await olcModeler.saveXML({format: true})).xml;
     zip.file('olcs.xml', olcs);
+    const resourceModel = (await resourceModeler.saveXML({format: true})).xml;
+    zip.file('resourceModel.xml', resourceModel);
     const terminationCondition = (await terminationConditionModeler.saveXML({format: true})).xml;
     zip.file('terminationCondition.xml', terminationCondition);
     const dependencyModel = (await dependencyModeler.saveXML({format: true})).xml;
@@ -181,6 +196,7 @@ async function importFromZip(zipData) {
         olcs: zip.file('olcs.xml'),
         terminationCondition: zip.file('terminationCondition.xml'),
         dependencyModel: zip.file('dependencyModel.xml'),
+        resourceModel: zip.file('resourceModel.xml'),
         roleModel: zip.file('roleModel.xml')
     };
     Object.keys(files).forEach(key => {
@@ -195,7 +211,27 @@ async function importFromZip(zipData) {
     await fragmentModeler.importXML(await files.fragments.async("string"));
     await terminationConditionModeler.importXML(await files.terminationCondition.async("string"));
     await objectiveModeler.importXML(await files.objectiveModel.async("string"));
+    await resourceModeler.importXML(await files.resourceModel.async("string"));
     checker.activate();
+}
+
+export async function planButtonAction() {
+    const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+    let executionLog = planner.generatePlan();
+    let blob = await exportExecutionPlan(executionLog);
+
+    const url = window.URL.createObjectURL(blob);
+
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Execution Plan.xlsx';
+
+    // Programmatically click the link to initiate the download
+    link.click();
+
+    // Clean up the temporary URL
+    window.URL.revokeObjectURL(url);
 }
 
 // IO Buttons
@@ -218,7 +254,11 @@ document.getElementById('saveButton').addEventListener('click', () => exportToZi
 
 async function displayFileName(zipName) {
     document.getElementById("fileName").innerHTML = zipName;
-};
+}
+
+document.getElementById('planningButton').addEventListener('click', () => {
+    planButtonAction();
+});
 
 async function navigationDropdown() {
     var container = document.getElementById("navigationBar");
@@ -243,8 +283,6 @@ async function navigationDropdown() {
         if (event.target === selectOlcComponent || event.target === selectedOlcSpan) {
             repopulateDropdown();
             showSelectOlcMenu();
-        } else {
-            return;
         }
     });
 
@@ -254,7 +292,9 @@ async function navigationDropdown() {
 
     function repopulateDropdown() {
         var modelers = mediator.getModelers();
-        modelers.sort((a, b) => {return a.rank - b.rank});
+        modelers.sort((a, b) => {
+            return a.rank - b.rank
+        });
         if (ENABLE_CONSTRUCTION_MODE) {
             modelers = modelers.filter(object => object !== terminationConditionModeler);
         }
@@ -285,7 +325,7 @@ async function navigationDropdown() {
     selectOlcComponent.showValue(currentModeler);
     selectOlcComponent.appendChild(selectedOlcSpan);
     buttonBar.appendChild(selectOlcComponent);
-};
+}
 
 navigationDropdown();
 
@@ -397,3 +437,4 @@ window.export = function (modeler) {
 }
 
 window.checker = checker;
+

@@ -27,7 +27,6 @@ import DepDrawModule from './draw';
 import DepRulesModule from './rules';
 import DepModelingModule from './modeling';
 import DepAutoPlaceModule from './auto-place';
-import DmButtonBarModule from './buttonbar';
 
 import DepModdle from './moddle';
 import {nextPosition, root} from '../util/Util';
@@ -36,8 +35,7 @@ var emptyDiagram =
   `<?xml version="1.0" encoding="UTF-8"?>
 <dep:definitions xmlns:olc="http://bptlab/schema/olc" xmlns:olcDi="http://bptlab/schema/olcDi">
   <dep:goal id="MainGoal">
-    <dep:objective id="start_state" type="dep:Objective" name="Current state" x="465" y="293" />
-    <dep:objective id="final_state" type="dep:Objective" name="Fina l state" x="765" y="293" />
+    <dep:objective id="start_state" type="dep:Objective" name="Start State" x="465" y="293" />
   </dep:goal>
 </dep:definitions>`;
 
@@ -84,7 +82,6 @@ export default function DependencyModeler(options) {
     DepModelingModule,
     DepLabelHandling,
     DepAutoPlaceModule,
-    DmButtonBarModule,
     {
       moddle: ['value', new DepModdle({})],
       dependencyModeler: ['value', this]
@@ -113,22 +110,12 @@ inherits(DependencyModeler, Diagram);
 DependencyModeler.prototype.id = "DEP";
 DependencyModeler.prototype.rank = 4;
 
-
-DependencyModeler.prototype._interactionModules = [
-  DmButtonBarModule,
-];
-
     DependencyModeler.prototype.name = function (constructionMode) {
   if (constructionMode) {
     return "Timeline";
   } else {
     return "Dependency Model";
   }
-}
-
-DependencyModeler.prototype.getGoal = function () {
-  let dependencies = this._definitions;
-  return dependencies;
 }
 
 DependencyModeler.prototype.createNew = function () {
