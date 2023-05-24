@@ -24,8 +24,8 @@ function compileQuery(objectives, goal) {
         newFunctions.forEach(fun => 
             preliminaryFunctions.add(fun)
         )
-        objectiveEvaluations += objectiveFunction
-        goalEvaluation += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`
+        objectiveEvaluations += objectiveFunction;
+        goalEvaluation += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`;
         if (objeciveIdx < orderedObjectives.length - 1) goalEvaluation += ' andalso ';
         goalEvaluationClosing += '))'
     })
@@ -34,7 +34,17 @@ function compileQuery(objectives, goal) {
         query += fun
     }
 
-    let evaluation = "eval_node Goal 1;"
+    let evaluation = `fun evaluateNode a = 
+      let val destNode = DestNode(a)
+      in eval_node Goal destNode
+    end
+    val nextArcs: int list ref = ref [];
+    val results: (TI.TransInst * bool) list ref = ref([]);
+    nextArcs := OutArcs(1);
+    results := List.map(fn (action) => (
+      (ArcToTI(action), evaluateNode(action) )
+      ))(!nextArcs);
+    results;`;
 
     return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + ';\n' + evaluation;
 }

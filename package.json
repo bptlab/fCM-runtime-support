@@ -23,7 +23,7 @@
     "@types/jest": "^29.5.1",
     "browserify": "^17.0.0",
     "esmify": "^2.1.1",
-    "grunt": "^1.5.2",
+    "grunt": "^1.6.1",
     "grunt-browserify": "^6.0.0",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-connect": "^3.0.0",
@@ -38,11 +38,12 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "bpmn-js": "^8.8.2",
-    "diagram-js": "^7.8.1",
+    "bpmn-js": "^8.10.0",
+    "diagram-js": "^7.9.0",
     "exceljs": "^4.3.0",
     "grunt-shell": "^4.0.0",
-    "jquery": "^3.6.0",
-    "jszip": "^3.7.1"
+    "jquery": "^3.7.0",
+    "jszip": "^3.7.1",
+    "tsc": "^2.0.4"
   }
 }
