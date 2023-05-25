@@ -1,4 +1,4 @@
-import {download} from '../util/FileUtil';
+import {download} from './lib/util/FileUtil';
 import {is} from "bpmn-js/lib/util/ModelUtil";
 
 export function exportQuery(objectives, goal) {

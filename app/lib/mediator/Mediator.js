@@ -6,7 +6,6 @@ import AbstractHook from './AbstractHook';
 import CommonEvents from '../common/CommonEvents';
 import ObjectiveEvents from "../objectivemodeler/ObjectiveEvents";
 import OlcEvents from '../olcmodeler/OlcEvents';
-import {exportQuery} from './StateSpaceQueryHelper';
 
 const DEFAULT_EVENT_PRIORITY = 1000; //From diagram-js/lib/core/EventBus.DEFAULT_PRIORITY
 
@@ -919,10 +918,3 @@ Mediator.prototype.TerminationConditionModelerHook = function (terminationCondit
 }
 
 Mediator.prototype.TerminationConditionModelerHook.isHook = true;
-
-Mediator.prototype.exportQuery = function () {
-    console.log('Mediator.prototype.exportQuery')
-    let objectives = this.objectiveModelerHook.modeler.getAllObjectives();
-    let goal = this.dependencyModelerHook.modeler.getGoal();
-    exportQuery(objectives, goal)
-}

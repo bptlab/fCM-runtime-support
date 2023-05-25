@@ -27,6 +27,7 @@ import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {LOAD_DUMMY, SHOW_DEBUG_BUTTONS, ENABLE_CONSTRUCTION_MODE} from './featureFlags'
 import {exportExecutionPlan} from "../dist/excel/excel.js";
+import {exportQuery} from './StateSpaceQueryHelper';
 
 var mediator = new Mediator();
 window.mediator = mediator;
@@ -215,6 +216,10 @@ async function importFromZip(zipData) {
     checker.activate();
 }
 
+export async function recommendationsButtonAction() {
+    exportQuery([], [])
+}
+
 export async function planButtonAction() {
     const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
     let executionLog = planner.generatePlan();
@@ -258,6 +263,10 @@ async function displayFileName(zipName) {
 
 document.getElementById('planningButton').addEventListener('click', () => {
     planButtonAction();
+});
+
+document.getElementById('recommendationsButton').addEventListener('click', () => {
+    recommendationsButtonAction();
 });
 
 async function navigationDropdown() {
