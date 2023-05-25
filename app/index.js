@@ -219,7 +219,8 @@ async function importFromZip(zipData) {
 }
 
 export async function recommendationsButtonAction() {
-    exportQuery([], [])
+    const modelObjectParser = new ModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+    exportQuery(modelObjectParser.objectives)
 }
 
 export async function planButtonAction() {

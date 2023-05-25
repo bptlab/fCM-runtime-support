@@ -1,16 +1,17 @@
 import {download} from './lib/util/FileUtil';
 import {is} from "bpmn-js/lib/util/ModelUtil";
 
-export function exportQuery(objectives, goal) {
-    const query = compileQuery(objectives, goal);
+export function exportQuery(objectives) {
+    const query = compileQuery(objectives);
     console.log(query)
     //download('query.txt', query);
     return;
 }
 
-function compileQuery(objectives, goal) {
+function compileQuery(objectives) {
     let query = `use(ogpath^"ASKCTL/ASKCTLloader.sml");\n`;
-    const orderedObjectives = orderObjectives(objectives, goal)
+    const parsedObjectives = parseObjectives(objectives)
+    console.log(parsedObjectives)
 
     let objectiveEvaluations = ''
 
@@ -19,14 +20,14 @@ function compileQuery(objectives, goal) {
 
     let preliminaryFunctions = new Set()
 
-    orderedObjectives.forEach((objective, objeciveIdx) => {
+    parsedObjectives.forEach((objective, objeciveIdx) => {
         const {objectiveFunction, objectiveFunctionName, newFunctions} = getObjectiveFunction(objective)
         newFunctions.forEach(fun => 
             preliminaryFunctions.add(fun)
         )
         objectiveEvaluations += objectiveFunction;
         goalEvaluation += `POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName}`;
-        if (objeciveIdx < orderedObjectives.length - 1) goalEvaluation += ' andalso ';
+        if (objeciveIdx < parsedObjectives.length - 1) goalEvaluation += ' andalso ';
         goalEvaluationClosing += '))'
     })
 
@@ -73,22 +74,18 @@ function getObjectFunction(object) {
 }
 
 
-function orderObjectives(objectives, goal) {
-  const goalDependencies = goal.goals[0].Elements.filter(element => is(element, 'dep:Dependency'))
-  const goalObjectives = goal.goals[0].Elements.filter(element => is(element, 'dep:Objective'))
-  const firstObjective = goalObjectives.find((objective) => goalDependencies.every(dependency => dependency.targetObjective.id !== objective.id))
-  let orderedObjectives = [firstObjective]
-  //TODO: Add correct sorting
+function parseObjectives(objectives) {
+  console.log(objectives)
 
-  orderedObjectives = objectives.map((objective, objectiveIdx) => ({
+  const parsedObjectives = objectives.map((objective, objectiveIdx) => ({
       name: `Objective${objectiveIdx}`,
-      objects: objective.boardElements?.map(element => ({
-          name: element.instance?.name ?? null,
-          class: element.classRef?.name ?? null,
-          state: element.state?.name ?? null,
+      objects: objective.dataObjectNodes?.map(node => ({
+          name: node.dataObjectInstance.name ?? null,
+          class: node.dataObjectInstance.dataclass.name ?? null,
+          states: node.states,
       })) ?? []
   }))
-  return orderedObjectives
+  return parsedObjectives
 }
 
 const mainPage = "Main_Page";
