@@ -26,8 +26,10 @@ import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {LOAD_DUMMY, SHOW_DEBUG_BUTTONS, ENABLE_CONSTRUCTION_MODE} from './featureFlags'
-import {exportExecutionPlan} from "../dist/excel/excel.js";
 import {exportQuery} from './StateSpaceQueryHelper';
+import {exportExecutionPlan} from "../dist/excel/excel.js";
+import {ModelObjectParser} from "../planner/parser/ModelObjectParser";
+
 
 var mediator = new Mediator();
 window.mediator = mediator;
@@ -221,7 +223,8 @@ export async function recommendationsButtonAction() {
 }
 
 export async function planButtonAction() {
-    const planner = parseObjects(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+    const modelObjectParser = new ModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+    const planner = modelObjectParser.createPlanner();
     let executionLog = planner.generatePlan();
     let blob = await exportExecutionPlan(executionLog);
 
