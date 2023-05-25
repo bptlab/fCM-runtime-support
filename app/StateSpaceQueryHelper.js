@@ -14,7 +14,7 @@ function compileQuery(objectives) {
 
     let objectiveEvaluations = ''
 
-    let goalEvaluation = `val Goal = `
+    let goalEvaluation = `val Goal = (`
     let goalEvaluationClosing = ''
 
     let preliminaryFunctions = new Set()
@@ -27,16 +27,16 @@ function compileQuery(objectives) {
         objectiveEvaluations += objectiveFunction;
         goalEvaluation += `AND (POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName})),`;
         if (objeciveIdx == parsedObjectives.length - 1) goalEvaluation += ' TT)';
-        goalEvaluationClosing += ')'
+        goalEvaluationClosing += ');\n'
     })
 
     for (const fun of preliminaryFunctions) {
         query += fun
     }
 
-    let evaluation = `fun evaluateNode a = 
-      let val destNode = DestNode(a)
-      in eval_node Goal destNode
+    let evaluation = `fun evaluateNode a =
+    let val destNode = DestNode(a)
+    in eval_node Goal destNode
     end
     val nextArcs: int list ref = ref [];
     val results: (TI.TransInst * bool) list ref = ref([]);
@@ -46,7 +46,7 @@ function compileQuery(objectives) {
       ))(!nextArcs);
     results;`;
 
-    return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + ';\n' + evaluation;
+    return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + evaluation;
 }
 
 function getObjectiveFunction(objective) {
@@ -65,9 +65,9 @@ function getObjectiveFunction(objective) {
 
 function getObjectFunction(object) {
     // function name
-    const name = `${object.name ?? 'any'}Of${object.class}IsIn${object.states[0] ?? 'undefined'}`
+    const name = `${object.name ?? 'any'}Of${object.class}IsIn${object.states.length ? object.states.join("") : 'any'}`
     // function boilerplate
-    let objectFunction = `fun ${name} n = (isSome(find( fn (token) => (`
+    let objectFunction = `fun ${name} n = (isSome(find( fn (token: DATA_OBJECT) => (`
     // check the object's id
     objectFunction += `${object.name ? '(#id token) = "' + object.name + '")' : ''} `
     // concatenate if necessary
@@ -82,7 +82,7 @@ function getObjectFunction(object) {
     // set default if nothing is required
     if(!object.states.length && ! object.name) objectFunction += 'TT'
     // function boilerplate
-    objectFunction += `))(Mark.Main_Page'${object.class} 1 n));\n`
+    objectFunction += `)(Mark.Main_Page'${object.class} 1 n)));\n`
     return {name, objectFunction}
 }
 
@@ -93,8 +93,8 @@ function parseObjectives(objectives) {
   const parsedObjectives = objectives.map((objective, objectiveIdx) => ({
       name: `Objective${objectiveIdx}`,
       objects: objective.dataObjectNodes?.map(node => ({
-          name: node.dataObjectInstance.name ? replaceWhiteSpace(node.dataObjectInstance.name) : null,
-          class: node.dataObjectInstance.dataclass.name ? replaceWhiteSpace(node.dataObjectInstance.dataclass.name):  null,
+          name: node.dataObjectInstance?.name ? replaceWhiteSpaceAndLowercase(node.dataObjectInstance.name) : null,
+          class: node.dataObjectInstance?.dataclass?.name ? replaceWhiteSpaceAndLowercase(node.dataObjectInstance.dataclass.name):  null,
           states: node.states.map(state => replaceWhiteSpaceAndCapitalize(state)),
       })) ?? []
   }))
@@ -109,4 +109,9 @@ function replaceWhiteSpace(input) {
 function replaceWhiteSpaceAndCapitalize(input) {
   if (!input) return "";
   return replaceWhiteSpace(input.toUpperCase());
+}
+
+function replaceWhiteSpaceAndLowercase(input) {
+  if (!input) return "";
+  return replaceWhiteSpace(input.toLowerCase());
 }

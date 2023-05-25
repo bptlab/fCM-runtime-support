@@ -426,7 +426,7 @@ export default [
         link : 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Data-Model#d3---connect-the-case-class-to-every-other-class'
     },
     {
-        title: 'Check if all Objectives are reachable from the Start State.',
+        title: 'Check if all Objectives are reachable from the first Objective.',
         id: 'DEP2',
         getViolations(mediator) {
             const dependencyModeler = mediator.dependencyModelerHook.modeler;
@@ -462,7 +462,7 @@ export default [
                 const violations = [...unreachable].map(element => {
                     return {
                         element: element,
-                        message: 'This Objective is not reachable from the Start State.'
+                        message: 'This Objective is not reachable from the first State.'
                     };
                 });
                 return violations;
@@ -474,7 +474,7 @@ export default [
         link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Dependency-Model#dep2---check-if-all-objectives-are-reachable-from-the-start-state'
     },
     {
-        title : 'Connect the Start State to one other Objective.',
+        title : 'Connect the first Objective to one other Objective.',
         id : 'DEP3',
         getViolations(mediator) {
             const dependencyModeler = mediator.dependencyModelerHook.modeler;
@@ -484,7 +484,7 @@ export default [
             if (dependenciesFromStartState.length === 0) {
                 return [{
                     element : mediator.dependencyModelerHook.getRootObject(),
-                    message : 'Please connect the Start State to one other Objective.'
+                    message : 'Please connect the first Objective to one other Objective.'
                 }];
             } else {
                 return [];

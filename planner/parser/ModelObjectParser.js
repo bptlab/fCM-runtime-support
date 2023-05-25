@@ -23,7 +23,8 @@ export class ModelObjectParser {
         this.resources = this.parseResources(resourceModeler, this.roles);
         this.activities = this.parseActivities(fragmentModeler, this.dataclasses, this.roles);
         this.instances = this.parseInstances(objectiveModeler, this.dataclasses);
-        this.currentState = this.parseCurrentState(objectiveModeler, resourceModeler, this.resources, this.instances);
+        this.currentState = null
+        // this.currentState = this.parseCurrentState(objectiveModeler, resourceModeler, this.resources, this.instances);
         this.objectives = this.parseObjectives(objectiveModeler, dependencyModeler, this.instances);
         this.goal = new Goal(this.objectives);
     }
@@ -87,14 +88,14 @@ export class ModelObjectParser {
 
             let objectiveObjects = [];
             for (let object of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Object'))) {
-                objectiveObjects.push(new ObjectiveObject(object.id, dataObjectInstances.find(element => element.id === object.instance.id && element.dataclass.id === object.classRef.id), object.states.map(element => element.name)));
+                objectiveObjects.push(new ObjectiveObject(object?.id, dataObjectInstances.find(element => element?.id === object.instance?.id && element.dataclass?.id === object.classRef.id), object.states.map(element => element.name)));
             }
             let objectiveLinks = [];
             for (let link of modelObjectives[i].get('boardElements').filter((element) => is(element, 'om:Link'))) {
-                objectiveLinks.push(new ObjectiveLink(link.id, objectiveObjects.find(element => element.dataObjectInstance.id === link.sourceRef.instance.id && element.dataObjectInstance.dataclass.id === link.sourceRef.classRef.id), objectiveObjects.find(element => element.dataObjectInstance.id === link.targetRef.instance.id && element.dataObjectInstance.dataclass.id === link.targetRef.classRef.id)));
+                objectiveLinks.push(new ObjectiveLink(link.id, objectiveObjects.find(element => element.dataObjectInstance?.id === link.sourceRef.instance?.id && element.dataObjectInstance?.dataclass?.id === link.sourceRef.classRef?.id), objectiveObjects.find(element => element.dataObjectInstance?.id === link.targetRef.instance?.id && element.dataObjectInstance?.dataclass?.id === link.targetRef.classRef?.id)));
             }
 
-            if (objectiveId === 'start_state') {
+            if (objectiveId === 'start_state' ) {
                 objectives.push(new Objective(objectiveId, objectiveObjects, objectiveLinks, parseInt(objectiveModeler._definitions.get('rootBoards')[i].objectiveRef?.date)));
             } else {
                 let previousObjectiveId = dependencyLinks.find(element => element.targetObjective.id === objectiveId).sourceObjective.id;
@@ -114,7 +115,7 @@ export class ModelObjectParser {
 
         let stateInstances = [];
         for (let executionDataObjectInstance of startState.get('boardElements').filter((element) => is(element, 'om:Object'))) {
-            stateInstances.push(new StateInstance(dataObjectInstances.find(element => element.id === executionDataObjectInstance.instance.id && element.dataclass.id === executionDataObjectInstance.classRef.id), executionDataObjectInstance.states[0].name));
+            stateInstances.push(new StateInstance(dataObjectInstances.find(element => element?.id === executionDataObjectInstance.instance?.id && element.dataclass?.id === executionDataObjectInstance.classRef?.id), executionDataObjectInstance.states[0].name));
         }
         let instanceLinks = [];
         for (let instanceLink of startState.get('boardElements').filter((element) => is(element, 'om:Link'))) {
