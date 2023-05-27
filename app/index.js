@@ -265,9 +265,9 @@ async function displayFileName(zipName) {
     document.getElementById("fileName").innerHTML = zipName;
 }
 
-document.getElementById('planningButton').addEventListener('click', () => {
-    planButtonAction();
-});
+// document.getElementById('planningButton').addEventListener('click', () => {
+//     planButtonAction();
+// });
 
 document.getElementById('recommendationsButton').addEventListener('click', () => {
     recommendationsButtonAction();

@@ -3,7 +3,7 @@ import {download} from './lib/util/FileUtil';
 export function exportQuery(objectives) {
     const query = compileQuery(objectives);
     console.log(query)
-    //download('query.txt', query);
+    download('query.txt', query);
     return;
 }
 
