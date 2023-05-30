@@ -104,9 +104,14 @@ export class ModelObjectParser {
 
             let objectiveObjects = [];
             for (let object of modelObjectives[i].get('boardElements').filter(element => is(element, 'om:Object'))) {
-                objectiveObjects.push(new ObjectiveObject(object.id, instances.find(instance =>
-                        instance.id === object.instance.id && instance.dataclass.id === object.classRef.id),
-                    object.states.map(state => state.name)));
+                if (object.instance) {
+                    objectiveObjects.push(new ObjectiveObject(object.id, instances.find(instance =>
+                            instance.id === object.instance.id && instance.dataclass.id === object.classRef.id),
+                        object.states.map(state => state.name)));
+                }
+                else {
+                    objectiveObjects.push(new ObjectiveObject(object.id, undefined, object.states.map(state => state.name)));
+                }
             }
             let objectiveLinks = [];
             for (let link of modelObjectives[i].get('boardElements').filter(element => is(element, 'om:Link'))) {
