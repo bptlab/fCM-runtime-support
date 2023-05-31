@@ -5,11 +5,15 @@ export class ObjectiveObject {
     id: string;
     instance: Instance;
     states: string[];
+    dataClass: string;
+    instanceName: string | null;
 
-    public constructor(id: string, instance: Instance, states: string[]) {
+    public constructor(id: string, instance: Instance, states: string[], dataClass: string, instanceName: string | null) {
         this.id = id;
         this.instance = instance;
         this.states = states;
+        this.dataClass = dataClass
+        this.instanceName = instanceName
     }
 
     public isMatchedBy(stateInstance: StateInstance) {

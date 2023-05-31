@@ -142,9 +142,9 @@ beforeEach(() => {
     outputSetBuyCables = new IOSet([cableAvailable]);
 
     //reset ObjectiveObjects
-    objectiveObject = new ObjectiveObject("1", mapleStreet, ["painted"]);
-    objectiveObject2 = new ObjectiveObject("2", mapleStreet, ["tiled"]);
-    objectiveObject3 = new ObjectiveObject("3", bakerStreet, ["painted"]);
+    objectiveObject = new ObjectiveObject("1", mapleStreet, ["painted"], '', '');
+    objectiveObject2 = new ObjectiveObject("2", mapleStreet, ["tiled"], '', '');
+    objectiveObject3 = new ObjectiveObject("3", bakerStreet, ["painted"], '', '');
 
     //reset objectives
     objective = new Objective("", [objectiveObject], []);

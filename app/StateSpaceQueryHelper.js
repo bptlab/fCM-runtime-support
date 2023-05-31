@@ -3,7 +3,7 @@ import {download} from './lib/util/FileUtil';
 export function exportQuery(objectives) {
     const query = compileQuery(objectives);
     console.log(query)
-    download('query.txt', query);
+    // download('query.txt', query);
     return;
 }
 
@@ -27,8 +27,8 @@ function compileQuery(objectives) {
         objectiveEvaluations += objectiveFunction;
         goalEvaluation += `AND (POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName})),`;
         if (objeciveIdx == parsedObjectives.length - 1) goalEvaluation += ' TT)';
-        goalEvaluationClosing += ');\n'
     })
+    goalEvaluationClosing += ');\n'
 
     for (const fun of preliminaryFunctions) {
         query += fun
@@ -80,7 +80,7 @@ function getObjectFunction(object) {
     // end concatenation if necessary
     if(object.states.length >= 0 && object.name) objectFunction += ')'
     // set default if nothing is required
-    if(!object.states.length && ! object.name) objectFunction += 'TT'
+    if(!object.states.length && ! object.name) objectFunction += 'true'
     // function boilerplate
     objectFunction += `)(Mark.Main_Page'${object.class} 1 n)));\n`
     return {name, objectFunction}
@@ -91,10 +91,10 @@ function parseObjectives(objectives) {
   console.log(objectives)
 
   const parsedObjectives = objectives.map((objective, objectiveIdx) => ({
-      name: `Objective${objectiveIdx}`,
-      objects: objective.dataObjectNodes?.map(node => ({
-          name: node.dataObjectInstance?.name ? replaceWhiteSpaceAndLowercase(node.dataObjectInstance.name) : null,
-          class: node.dataObjectInstance?.dataclass?.name ? replaceWhiteSpaceAndLowercase(node.dataObjectInstance.dataclass.name):  null,
+      name: `Objective${objectiveIdx+1}`,
+      objects: objective.objectiveObjects?.map(node => ({
+          name: node.instanceName? `${node.instanceName.replace(/[0-9]/g, '').toLowerCase()}${node.instanceName.match(/\d+/)[0] - 1}` : null,
+          class: node.dataClass ??  null,
           states: node.states.map(state => replaceWhiteSpaceAndCapitalize(state)),
       })) ?? []
   }))

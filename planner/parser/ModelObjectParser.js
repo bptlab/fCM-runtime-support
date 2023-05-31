@@ -18,15 +18,21 @@ import {cartesianProduct} from "../../dist/Util";
 
 export class ModelObjectParser {
     constructor(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler) {
-        this.dataclasses = this.parseDataclasses(dataModeler);
-        this.roles = this.parseRoles(roleModeler);
-        this.resources = this.parseResources(resourceModeler, this.roles);
-        this.activities = this.parseActivities(fragmentModeler, this.dataclasses, this.roles);
-        this.instances = this.parseInstances(objectiveModeler, this.dataclasses);
+        this.dataclasses = null;
+        this.roles = null;
+        this.resources = null;
+        this.activities = null;
+        this.instances = null;
         this.currentState = null
+        // this.dataclasses = this.parseDataclasses(dataModeler);
+        // this.roles = this.parseRoles(roleModeler);
+        // this.resources = this.parseResources(resourceModeler, this.roles);
+        // this.activities = this.parseActivities(fragmentModeler, this.dataclasses, this.roles);
+        // this.instances = this.parseInstances(objectiveModeler, this.dataclasses);
         // this.currentState = this.parseCurrentState(objectiveModeler, resourceModeler, this.resources, this.instances);
         this.objectives = this.parseObjectives(objectiveModeler, dependencyModeler, this.instances);
-        this.goal = new Goal(this.objectives);
+        this.goal = null;
+        // this.goal = new Goal(this.objectives);
     }
 
     createPlanner() {
@@ -105,23 +111,26 @@ export class ModelObjectParser {
 
             let objectiveObjects = [];
             for (let object of modelObjectives[i].get('boardElements').filter(element => is(element, 'om:Object'))) {
+                console.log(object)
                 if (object.instance) {
-                    objectiveObjects.push(new ObjectiveObject(object.id, instances.find(instance =>
-                            instance.id === object.instance.id && instance.dataclass.id === object.classRef.id),
-                        object.states.map(state => state.name)));
+                    objectiveObjects.push(new ObjectiveObject(object.id, instances?.find(instance =>
+                            instance.id === object.instance.id && instance.dataclass.id === object.classRef.id) ?? undefined,
+                        object.states?.map(state => state.name) ?? [],
+                        object.classRef.name,
+                        object.instance.name));
                 }
                 else {
-                    objectiveObjects.push(new ObjectiveObject(object.id, undefined, object.states.map(state => state.name)));
+                    objectiveObjects.push(new ObjectiveObject(object.id, undefined, object.states?.map(state => state.name) ?? [], object.classRef.name, null));
                 }
             }
             let objectiveLinks = [];
             for (let link of modelObjectives[i].get('boardElements').filter(element => is(element, 'om:Link'))) {
                 objectiveLinks.push(new ObjectiveLink(link.id, objectiveObjects.find(objectiveObject =>
-                        objectiveObject.instance.id === link.sourceRef.instance.id &&
-                        objectiveObject.instance.dataclass.id === link.sourceRef.classRef.id),
+                        objectiveObject.instance?.id === link.sourceRef.instance?.id &&
+                        objectiveObject.instance?.dataclass?.id === link.sourceRef.classRef.id),
                     objectiveObjects.find(objectiveObject =>
-                        objectiveObject.instance.id === link.targetRef.instance.id &&
-                        objectiveObject.instance.dataclass.id === link.targetRef.classRef.id
+                        objectiveObject.instance?.id === link.targetRef.instance?.id &&
+                        objectiveObject.instance?.dataclass?.id === link.targetRef.classRef.id
                     ))
                 );
             }
