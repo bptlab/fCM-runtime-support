@@ -1,6 +1,6 @@
 # Goal Models for fCM-js
 
-This repository is a fork of [fCM-js]{https://github.com/bptlab/fCM-design-support}. fCM-js is a modeling tool for fragment-based case management. It aims at supporting users at design time by providing a joint, visual user interface for all artifacts and by integrating automated guideline checking based on fCM guidelines.
+This repository is a fork of [fCM-js](https://github.com/bptlab/fCM-design-support). fCM-js is a modeling tool for fragment-based case management. It aims at supporting users at design time by providing a joint, visual user interface for all artifacts and by integrating automated guideline checking based on fCM guidelines.
 This repository provides an extension of fCM-js that allows modeling goals that are consistent with the fCM model. Goals can be modeled as a dependency graph that orders objectives. Objectives can be modeled as UML object diagrams.
 The tool [fcm2cpn](https://github.com/bptlab/fcm2cpn) allows to generate a colored Petri net (CPN) that represents the formal translational semantics of an fCM model. This CPN can be executed in [CPN Tools](http://cpntools.org).
 The goals modeled in this tool, can be used to generate state space queries that can be used in the CPN representation of an fCM model to derive recommendations for the current state of execution. 
@@ -19,7 +19,7 @@ npm run build
 npm run serve
 ```
 
-The modeler is then served to `http://localhost:9005`.
+The modeler is then served to [http://localhost:9005](http://localhost:9005).
 
 When developing, the following can be run to automatically re-bundle on changes:
 ```shell
@@ -28,7 +28,36 @@ npm run dev
 
 ## Usage
 
-...
+This tool allows creating goal models that are within the scope of an fCM model. Analog to [fCM-js](https://github.com/bptlab/fCM-design-support), a modeler can model fragments, a data model, object lifecycles, and a termination condition in separate modelers to specify their process.
+Additionally, this tool provides an `Objective Modeler` to model multiple objectives and a `Dependency Modeler` to model a goal. The different modelers can be accessed by choosing from the dropdown menu at the top right.
+
+Insert Picture!
+
+To access the model presented in the paper "Data-centric Goal Modeling for Knowledge-intensive Processes", run the tool as described and click the `Open` button. Then select the file `example/construction.zip` in this repository. The example fCM is uploaded including the goal model presented in the paper.
+
+### Objective Modeler
+
+The objective modeler allows defining multiple objectives as UML object diagrams. The modeler can create new objects that are instances of the classes of the fCM's data model. Links can be created, that connect the objects. For each object, a class needs to be defined. For an object, an instance can be created.
+Also, allowed states for the object can be defined. Per default, the state is defined as `any`. From the list of states as defined in the OLC for the selected class the desired states can be selected.
+
+Insert Picture
+
+### Goal Modeler
+
+The goal modeler allows to define the temporal order in which the objectives are ought to hold. It is a dependency graph and defines a partial order of objectives. All modeled objectives are represented as a node in the modeler. They can be connected with directed arcs to define the ordering constraints.
+
+Insert Picture
+
+### Generating State Space Queries
+
+The modeler allows to generate state space queries that can be used to derive recommendations while executing the fCM in CPN Tools.
+By clicking on the button in the bottom right corner, a state space query is compiled for the modeled goal. As a result, a text file is downloaded containing the query. This query can be used to 
+
+Insert Picture
+
+### Using a State Space Query in CPN Tools
+
+
 
 ## License
 
