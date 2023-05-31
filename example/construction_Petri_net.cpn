@@ -2386,8 +2386,8 @@ site started</text>
       </arc>
       <constraints/>
       <Aux id="ID1436298630">
-        <posattr x="-561.000000"
-                 y="-312.000000"/>
+        <posattr x="-529.000000"
+                 y="-294.000000"/>
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
@@ -2424,10 +2424,7 @@ nextArcs := OutArcs(1);
 results := List.map(fn (action) =&gt; (
 (ArcToTI(action), evaluateNode(action) )
 ))(!nextArcs);
-results;
-
-
-</text>
+results;</text>
       </Aux>
       <ssarc id="ID1436338393"
              order="1"
@@ -2437,10 +2434,10 @@ results;
         <fillattr colour="White"
                   pattern="Solid"
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour=""
                   thick="0"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour=""
                   bold="false"/>
         <arrowattr headsize="1.000000"
                    currentcyckle="2"/>
@@ -2449,7 +2446,7 @@ results;
         <descriptor x="88.000000"
                     y="-31.000000"
                     visible="true"
-                    dead="false">
+                    dead="true">
           <text>5:1-&gt;6 lay_tiles&apos;lay_tiles1_0 1: {apartmentId=&quot;apartment1&quot;,caseId=&quot;case0&quot;,tilesCount=0,tilesId=&quot;tiles0&quot;}</text>
         </descriptor>
       </ssarc>
@@ -2461,10 +2458,10 @@ results;
         <fillattr colour="White"
                   pattern="Solid"
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour=""
                   thick="0"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour=""
                   bold="false"/>
         <arrowattr headsize="1.000000"
                    currentcyckle="2"/>
@@ -2473,7 +2470,7 @@ results;
         <descriptor x="90.000000"
                     y="-22.000000"
                     visible="true"
-                    dead="false">
+                    dead="true">
           <text>4:1-&gt;5 lay_tiles&apos;lay_tiles0_0 1: {apartmentId=&quot;apartment0&quot;,caseId=&quot;case0&quot;,tilesCount=0,tilesId=&quot;tiles0&quot;}</text>
         </descriptor>
       </ssarc>
@@ -2485,10 +2482,10 @@ results;
         <fillattr colour="White"
                   pattern="Solid"
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour=""
                   thick="0"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour=""
                   bold="false"/>
         <arrowattr headsize="1.000000"
                    currentcyckle="2"/>
@@ -2497,7 +2494,7 @@ results;
         <descriptor x="92.000000"
                     y="-12.000000"
                     visible="true"
-                    dead="false">
+                    dead="true">
           <text>3:1-&gt;4 paint_apartment&apos;paint_apartment0_1 1: {apartmentId=&quot;apartment0&quot;,caseId=&quot;case0&quot;,paintCount=1,paintId=&quot;paint1&quot;}</text>
         </descriptor>
       </ssarc>
@@ -2509,10 +2506,10 @@ results;
         <fillattr colour="White"
                   pattern="Solid"
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour=""
                   thick="0"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour=""
                   bold="false"/>
         <arrowattr headsize="1.000000"
                    currentcyckle="2"/>
@@ -2521,7 +2518,7 @@ results;
         <descriptor x="123.000000"
                     y="-2.000000"
                     visible="true"
-                    dead="false">
+                    dead="true">
           <text>2:1-&gt;3 paint_apartment&apos;paint_apartment0_0 1: {apartmentId=&quot;apartment0&quot;,caseId=&quot;case0&quot;,paintCount=1,paintId=&quot;paint1&quot;}</text>
         </descriptor>
       </ssarc>
@@ -2533,10 +2530,10 @@ results;
         <fillattr colour="White"
                   pattern="Solid"
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour=""
                   thick="0"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour=""
                   bold="false"/>
         <arrowattr headsize="1.000000"
                    currentcyckle="2"/>
@@ -2545,7 +2542,7 @@ results;
         <descriptor x="128.000000"
                     y="12.000000"
                     visible="true"
-                    dead="false">
+                    dead="true">
           <text>1:1-&gt;2 build_apartment&apos;build_apartment0_0 1: {caseId=&quot;case0&quot;,houseId=&quot;house0&quot;,apartmentCount=2,apartmentId=&quot;apartment2&quot;}</text>
         </descriptor>
       </ssarc>
@@ -2558,15 +2555,15 @@ results;
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour="Gray"
                   thick="1"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour="Gray"
                   bold="false"/>
         <descriptor x="0.000000"
                     y="0.000000"
                     visible="false"
-                    dead="false">
+                    dead="true">
           <text>1:
 Main_Page&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
 Main_Page&apos;staircase 1: 1`{id=&quot;staircase0&quot;,caseId=&quot;case0&quot;,state=INIT}
@@ -2611,8 +2608,7 @@ construction_site_started&apos;cf0 1: empty
 build_apartment&apos;apartment_Count 1: 1`2
 build_apartment&apos;apartment 1: 1`{id=&quot;apartment0&quot;,caseId=&quot;case0&quot;,state=INIT}++
 1`{id=&quot;apartment1&quot;,caseId=&quot;case0&quot;,state=PAINTED}
-build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
-</text>
+build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}</text>
         </descriptor>
         <roundbox w="45.000000"
                   h="40.000000"/>
@@ -2626,15 +2622,15 @@ build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour="Gray"
                   thick="1"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour="Gray"
                   bold="false"/>
         <descriptor x="0.000000"
                     y="0.000000"
                     visible="false"
-                    dead="false">
+                    dead="true">
           <text>6:
 Main_Page&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
 Main_Page&apos;staircase 1: 1`{id=&quot;staircase0&quot;,caseId=&quot;case0&quot;,state=INIT}
@@ -2679,8 +2675,7 @@ construction_site_started&apos;cf0 1: empty
 build_apartment&apos;apartment_Count 1: 1`2
 build_apartment&apos;apartment 1: 1`{id=&quot;apartment0&quot;,caseId=&quot;case0&quot;,state=INIT}++
 1`{id=&quot;apartment1&quot;,caseId=&quot;case0&quot;,state=TILES_LAID}
-build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
-</text>
+build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}</text>
         </descriptor>
         <roundbox w="45.000000"
                   h="40.000000"/>
@@ -2694,15 +2689,15 @@ build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour="Gray"
                   thick="1"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour="Gray"
                   bold="false"/>
         <descriptor x="0.000000"
                     y="0.000000"
                     visible="false"
-                    dead="false">
+                    dead="true">
           <text>5:
 Main_Page&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
 Main_Page&apos;staircase 1: 1`{id=&quot;staircase0&quot;,caseId=&quot;case0&quot;,state=INIT}
@@ -2747,8 +2742,7 @@ construction_site_started&apos;cf0 1: empty
 build_apartment&apos;apartment_Count 1: 1`2
 build_apartment&apos;apartment 1: 1`{id=&quot;apartment0&quot;,caseId=&quot;case0&quot;,state=TILES_LAID}++
 1`{id=&quot;apartment1&quot;,caseId=&quot;case0&quot;,state=PAINTED}
-build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
-</text>
+build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}</text>
         </descriptor>
         <roundbox w="45.000000"
                   h="40.000000"/>
@@ -2762,15 +2756,15 @@ build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour="Gray"
                   thick="1"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour="Gray"
                   bold="false"/>
         <descriptor x="0.000000"
                     y="0.000000"
                     visible="false"
-                    dead="false">
+                    dead="true">
           <text>4:
 Main_Page&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
 Main_Page&apos;staircase 1: 1`{id=&quot;staircase0&quot;,caseId=&quot;case0&quot;,state=INIT}
@@ -2818,8 +2812,7 @@ construction_site_started&apos;cf0 1: empty
 build_apartment&apos;apartment_Count 1: 1`2
 build_apartment&apos;apartment 1: 1`{id=&quot;apartment0&quot;,caseId=&quot;case0&quot;,state=PAINTED}++
 1`{id=&quot;apartment1&quot;,caseId=&quot;case0&quot;,state=PAINTED}
-build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
-</text>
+build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}</text>
         </descriptor>
         <roundbox w="45.000000"
                   h="40.000000"/>
@@ -2833,15 +2826,15 @@ build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour="Gray"
                   thick="1"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour="Gray"
                   bold="false"/>
         <descriptor x="0.000000"
                     y="0.000000"
                     visible="false"
-                    dead="false">
+                    dead="true">
           <text>3:
 Main_Page&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
 Main_Page&apos;staircase 1: 1`{id=&quot;staircase0&quot;,caseId=&quot;case0&quot;,state=INIT}
@@ -2889,8 +2882,7 @@ construction_site_started&apos;cf0 1: empty
 build_apartment&apos;apartment_Count 1: 1`2
 build_apartment&apos;apartment 1: 1`{id=&quot;apartment0&quot;,caseId=&quot;case0&quot;,state=PAINTED}++
 1`{id=&quot;apartment1&quot;,caseId=&quot;case0&quot;,state=PAINTED}
-build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
-</text>
+build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}</text>
         </descriptor>
         <roundbox w="45.000000"
                   h="40.000000"/>
@@ -2904,15 +2896,15 @@ build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
-        <lineattr colour="Black"
+        <lineattr colour="Gray"
                   thick="1"
                   type="Solid"/>
-        <textattr colour="Black"
+        <textattr colour="Gray"
                   bold="false"/>
         <descriptor x="0.000000"
                     y="0.000000"
                     visible="false"
-                    dead="false">
+                    dead="true">
           <text>2:
 Main_Page&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
 Main_Page&apos;staircase 1: 1`{id=&quot;staircase0&quot;,caseId=&quot;case0&quot;,state=INIT}
@@ -2963,8 +2955,7 @@ build_apartment&apos;apartment_Count 1: 1`3
 build_apartment&apos;apartment 1: 1`{id=&quot;apartment0&quot;,caseId=&quot;case0&quot;,state=INIT}++
 1`{id=&quot;apartment1&quot;,caseId=&quot;case0&quot;,state=PAINTED}++
 1`{id=&quot;apartment2&quot;,caseId=&quot;case0&quot;,state=INIT}
-build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}
-</text>
+build_apartment&apos;house 1: 1`{id=&quot;house0&quot;,caseId=&quot;case0&quot;,state=STARTED}</text>
         </descriptor>
         <roundbox w="45.000000"
                   h="40.000000"/>
@@ -8506,8 +8497,8 @@ action (String.concat[&quot;case&quot;, Int.toString(count)]);</text>
                  height="552">
         <sheets>
           <cpnsheet id="ID1436282317"
-                    panx="159.000000"
-                    pany="-186.000000"
+                    panx="161.000000"
+                    pany="-195.000000"
                     zoom="1.000000"
                     instance="id0itop">
             <zorder>
@@ -8581,8 +8572,8 @@ action (String.concat[&quot;case&quot;, Int.toString(count)]);</text>
         <zorder>
           <position value="4"/>
           <position value="7"/>
-          <position value="1"/>
           <position value="3"/>
+          <position value="1"/>
           <position value="2"/>
           <position value="5"/>
           <position value="6"/>
@@ -8656,9 +8647,7 @@ action (String.concat[&quot;case&quot;, Int.toString(count)]);</text>
           <IndexNode expanded="false"/>
         </IndexNode>
       </IndexNode>
-      <IndexNode expanded="false">
-        <IndexNode expanded="false"/>
-      </IndexNode>
+      <IndexNode expanded="false"/>
       <IndexNode expanded="true">
         <IndexNode expanded="true">
           <IndexNode expanded="false"/>

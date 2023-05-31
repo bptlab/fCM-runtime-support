@@ -57,7 +57,35 @@ Insert Picture
 
 ### Using a State Space Query in CPN Tools
 
+The downloaded state space query can be used in CPN Tools. Download [CPN Tools](https://cpntools.org/category/downloads/) and run a CPN that is the result of the [fcm2cpn](https://github.com/bptlab/fcm2cpn) compiler or open the provided example from `example/construction.cpn`.
+You can execute the CPN by choosing the simulation tool and selecting the enabled (green) transitions in the according tabs.
 
+Insert Picture
+
+For example, execute the following sequence of actions:
+1. Execute the start event `construction site started`.
+2. Execute the action `start house`.
+3. Create two new apartments by executing `build apartment` twice.
+4. Paint the second apartment yellow by executing the transition `paint_apartment0_0` in the `paint apartment` tab for the token with the id `assignment1`. This specific transition represents one of the possible 4 input-output-set combinations in the fCM (Apartments in init or with tiles can be painted either yellow or green).
+
+Insert Figure
+
+Now the state of the case is that there is one house in the state started. It has two apartments. The first is in init. The second is painted with yellow paint. Now, different actions are available, for which a recommendation is needed.
+
+For the current situation, the state space can be generated (1). Then the SCC Graph needs to be calculated (2). Afterward, the state space can be visualized by adding the current state (3) and its successor nodes (4). When clicking on the arcs, the information on the concrete actions is displayed.
+
+Insert Picture
+
+To receive recommendations for the current situation, the desired goals can be defined in the objective modeler and the dependency modeler and a state space query can be generated. It can be downloaded and pasted into a text fiel d in CPN Tools. It can be executed as a Standard ML code snippet. The query returns a list of pairs of next actions and a boolean indicating whether or not it aligns with the defined goal.
+
+Insert Picture
+
+For the given example, five actions are enabled.
+(i) For `lay_tiles1_0`, i.e. laying tiles for the second apartment, it returns false. This action does not align with the goal.
+(ii) For `lay_tiles0_0`, i.e. laying tiles for the first apartment, it returns ture, because it aligns with the goal.
+(iii) For `paint_apartment0_1`, i.e. painting the first apartment green, it returns true. This action can be executed.
+(iv) For `paint_apartment0_0`, i.e. painting the first apartment yellow, it returns false. This action should not be executed.
+(v) For building a new apartment in `build_apartment0_0`, the query returns true. This is allowed to happen to still reach the goal.
 
 ## License
 

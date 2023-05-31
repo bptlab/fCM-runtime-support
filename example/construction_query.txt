@@ -1,0 +1,28 @@
+use(ogpath^"ASKCTL/ASKCTLloader.sml");
+open List;
+fun anyOfpaintIsInany n = (isSome(find( fn (token: DATA_OBJECT) => (true))(Mark.Main_Page'paint 1 n)));
+fun apartment1OfapartmentIsInany n = (isSome(find( fn (token: DATA_OBJECT) => ((#id token) = "apartment1"))(Mark.Main_Page'apartment 1 n)));
+fun anyOfhouseIsInany n = (isSome(find( fn (token: DATA_OBJECT) => (true))(Mark.Main_Page'house 1 n)));
+fun apartment0OfapartmentIsInPAINTEDFINISHED n = (isSome(find( fn (token: DATA_OBJECT) => ((#id token) = "apartment0" andalso((#state token) = PAINTED orelse (#state token) = FINISHED)))(Mark.Main_Page'apartment 1 n)));
+fun kitchen0OfkitchenIsInany n = (isSome(find( fn (token: DATA_OBJECT) => ((#id token) = "kitchen0"))(Mark.Main_Page'kitchen 1 n)));
+fun anyOfpaintIsInGREEN n = (isSome(find( fn (token: DATA_OBJECT) => ((#state token) = GREEN))(Mark.Main_Page'paint 1 n)));
+fun anyOftilesIsInLAID n = (isSome(find( fn (token: DATA_OBJECT) => ((#state token) = LAID))(Mark.Main_Page'tiles 1 n)));
+fun apartment1OfapartmentIsInPAINTED n = (isSome(find( fn (token: DATA_OBJECT) => ((#id token) = "apartment1" andalso((#state token) = PAINTED)))(Mark.Main_Page'apartment 1 n)));
+fun anyOfstaircaseIsInPAINTED n = (isSome(find( fn (token: DATA_OBJECT) => ((#state token) = PAINTED))(Mark.Main_Page'staircase 1 n)));
+fun anyOfhouseIsInFINISHED n = (isSome(find( fn (token: DATA_OBJECT) => ((#state token) = FINISHED))(Mark.Main_Page'house 1 n)));
+fun checkObjective1 n = (anyOfpaintIsInany(n) andalso apartment1OfapartmentIsInany(n) );
+fun checkObjective2 n = (anyOfhouseIsInany(n) andalso apartment0OfapartmentIsInPAINTEDFINISHED(n) andalso kitchen0OfkitchenIsInany(n) andalso anyOfpaintIsInGREEN(n) andalso anyOftilesIsInLAID(n) andalso apartment1OfapartmentIsInPAINTED(n) );
+fun checkObjective3 n = (anyOfstaircaseIsInPAINTED(n) );
+fun checkObjective4 n = (anyOfhouseIsInFINISHED(n) );
+val Goal = (AND (POS(NF("Objective1", checkObjective1)),AND (POS(NF("Objective2", checkObjective2)),AND (POS(NF("Objective3", checkObjective3)),AND (POS(NF("Objective4", checkObjective4)), TT)))));
+fun evaluateNode a =
+let val destNode = DestNode(a)
+in eval_node Goal destNode
+end
+val nextArcs: int list ref = ref [];
+val results: (TI.TransInst * bool) list ref = ref([]);
+nextArcs := OutArcs(1);
+results := List.map(fn (action) => (
+(ArcToTI(action), evaluateNode(action) )
+))(!nextArcs);
+results;
