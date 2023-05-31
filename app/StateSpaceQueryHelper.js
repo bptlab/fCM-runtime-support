@@ -3,14 +3,13 @@ import {download} from './lib/util/FileUtil';
 export function exportQuery(objectives) {
     const query = compileQuery(objectives);
     console.log(query)
-    // download('query.txt', query);
+    download('query.txt', query);
     return;
 }
 
 function compileQuery(objectives) {
     let query = `use(ogpath^"ASKCTL/ASKCTLloader.sml");\nopen List;\n`;
     const parsedObjectives = parseObjectives(objectives)
-    console.log(parsedObjectives)
 
     let objectiveEvaluations = ''
 
@@ -99,8 +98,6 @@ function getObjectFunction(object) {
 
 
 function parseObjectives(objectives) {
-  console.log(objectives)
-
   const parsedObjectives = objectives.map((objective, objectiveIdx) => ({
       name: `Objective${objectiveIdx+1}`,
       objects: objective.objectiveObjects?.map(node => ({

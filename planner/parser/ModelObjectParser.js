@@ -111,7 +111,6 @@ export class ModelObjectParser {
 
             let objectiveObjects = [];
             for (let object of modelObjectives[i].get('boardElements').filter(element => is(element, 'om:Object'))) {
-                console.log(object)
                 if (object.instance) {
                     objectiveObjects.push(new ObjectiveObject(object.id, instances?.find(instance =>
                             instance.id === object.instance.id && instance.dataclass.id === object.classRef.id) ?? undefined,
