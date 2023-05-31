@@ -25,26 +25,27 @@ function compileQuery(objectives) {
             preliminaryFunctions.add(fun)
         )
         objectiveEvaluations += objectiveFunction;
-        goalEvaluation += `AND (POS(NF("Objective${objeciveIdx}", ${objectiveFunctionName})),`;
+        goalEvaluation += `AND (POS(NF("Objective${objeciveIdx + 1}", ${objectiveFunctionName})),`;
         if (objeciveIdx == parsedObjectives.length - 1) goalEvaluation += ' TT)';
+        goalEvaluationClosing += ')'
     })
-    goalEvaluationClosing += ');\n'
+    goalEvaluationClosing += ';\n'
 
     for (const fun of preliminaryFunctions) {
         query += fun
     }
 
     let evaluation = `fun evaluateNode a =
-    let val destNode = DestNode(a)
-    in eval_node Goal destNode
-    end
-    val nextArcs: int list ref = ref [];
-    val results: (TI.TransInst * bool) list ref = ref([]);
-    nextArcs := OutArcs(1);
-    results := List.map(fn (action) => (
-      (ArcToTI(action), evaluateNode(action) )
-      ))(!nextArcs);
-    results;`;
+let val destNode = DestNode(a)
+in eval_node Goal destNode
+end
+val nextArcs: int list ref = ref [];
+val results: (TI.TransInst * bool) list ref = ref([]);
+nextArcs := OutArcs(1);
+results := List.map(fn (action) => (
+(ArcToTI(action), evaluateNode(action) )
+))(!nextArcs);
+results;`;
 
     return query + objectiveEvaluations + goalEvaluation + goalEvaluationClosing + evaluation;
 }
@@ -68,21 +69,31 @@ function getObjectFunction(object) {
     const name = `${object.name ?? 'any'}Of${object.class}IsIn${object.states.length ? object.states.join("") : 'any'}`
     // function boilerplate
     let objectFunction = `fun ${name} n = (isSome(find( fn (token: DATA_OBJECT) => (`
-    // check the object's id
-    objectFunction += `${object.name ? '(#id token) = "' + object.name + '")' : ''} `
-    // concatenate if necessary
-    if(object.states.length >= 0 && object.name) objectFunction += ' andalso ('
-    // add condition for every state
-    object.states.forEach((state, stateIdx) => {
-      objectFunction += `(#state token) = ${state}`;
-      if (stateIdx < object.states.length - 1) objectFunction += ' orelse '
-    })
-    // end concatenation if necessary
-    if(object.states.length >= 0 && object.name) objectFunction += ')'
-    // set default if nothing is required
-    if(!object.states.length && ! object.name) objectFunction += 'true'
-    // function boilerplate
-    objectFunction += `)(Mark.Main_Page'${object.class} 1 n)));\n`
+    // if no name and states are given, return true
+    if(!object.name && !object.states.length) {
+      objectFunction += `true))(Mark.Main_Page'${object.class} 1 n)));\n`
+      return {name, objectFunction}
+    }
+    if(object.name && !object.states.length) {
+      objectFunction += `(#id token) = "${object.name}"))(Mark.Main_Page'${object.class} 1 n)));\n`
+      return {name, objectFunction}
+    }
+    if(!object.name && object.states.length){
+      object.states.forEach((state, stateIdx) => {
+        objectFunction += `(#state token) = ${state}`;
+        if (stateIdx < object.states.length - 1) objectFunction += ' orelse '
+      })
+      objectFunction += `))(Mark.Main_Page'${object.class} 1 n)));\n`
+      return {name, objectFunction}
+    }
+    if(object.name && object.states.length){
+      objectFunction += `(#id token) = "${object.name}" andalso(`
+      object.states.forEach((state, stateIdx) => {
+        objectFunction += `(#state token) = ${state}`;
+        if (stateIdx < object.states.length - 1) objectFunction += ' orelse '
+      })
+      objectFunction += `)))(Mark.Main_Page'${object.class} 1 n)));\n`
+    }
     return {name, objectFunction}
 }
 
@@ -93,8 +104,8 @@ function parseObjectives(objectives) {
   const parsedObjectives = objectives.map((objective, objectiveIdx) => ({
       name: `Objective${objectiveIdx+1}`,
       objects: objective.objectiveObjects?.map(node => ({
-          name: node.instanceName? `${node.instanceName.replace(/[0-9]/g, '').toLowerCase()}${node.instanceName.match(/\d+/)[0] - 1}` : null,
-          class: node.dataClass ??  null,
+          name: node.instanceName? `${node.instanceName.replace(/[0-9]/g, '').toLowerCase().replaceAll(" ", "")}${node.instanceName.match(/\d+/)[0] - 1}` : null,
+          class: node.dataClass.toLowerCase() ??  null,
           states: node.states.map(state => replaceWhiteSpaceAndCapitalize(state)),
       })) ?? []
   }))
