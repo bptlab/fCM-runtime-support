@@ -52,7 +52,7 @@ The goal modeler allows to define the temporal order in which the objectives are
 ### Generating State Space Queries
 
 The modeler allows to generate state space queries that can be used to derive recommendations while executing the fCM in CPN Tools.
-By clicking on the button in the bottom right corner, a state space query is compiled for the modeled goal. As a result, a text file is downloaded containing the query. This query can be used to 
+By clicking on the button in the bottom right corner, a state space query is compiled for the modeled goal. As a result, a text file is downloaded containing the query. This query can be used in CPN Tools.
 
 <img width="600" alt="Screenshot 2023-05-31 at 21 33 34" src="https://github.com/Noel-Bastubbe/for-Construction-Modeling/assets/32839252/04e9a431-8913-424e-819c-04096c4e766d">
 
@@ -77,7 +77,7 @@ For the current situation, the state space can be generated (1). Then the SCC Gr
 
 <img width="600" alt="CT3" src="https://github.com/Noel-Bastubbe/for-Construction-Modeling/assets/32839252/2555833d-d5ef-430e-8aec-c7105af64b2e">
 
-To receive recommendations for the current situation, the desired goals can be defined in the objective modeler and the dependency modeler and a state space query can be generated. It can be downloaded and pasted into a text fiel d in CPN Tools. It can be executed as a Standard ML code snippet. The query returns a list of pairs of next actions and a boolean indicating whether or not it aligns with the defined goal.
+To receive recommendations for the current situation, the desired goals can be defined in the objective modeler and the dependency modeler and a state space query can be generated. It can be downloaded and pasted into a text field in CPN Tools. It can be executed as a Standard ML code snippet. The query returns a list of pairs of next actions and a boolean indicating whether or not it aligns with the defined goal.
 
 <img width="600" alt="CT6" src="https://github.com/Noel-Bastubbe/for-Construction-Modeling/assets/32839252/76b5a31b-ca5b-406c-9f8f-73f1be4419cb">
 
