@@ -1,4 +1,4 @@
-import { is } from '../../util/Util';
+import {is} from '../../util/Util';
 
 export default function FragmentReplaceMenuProvider(popupMenu) {
     popupMenu.registerProvider('bpmn-replace', this);
@@ -8,8 +8,8 @@ FragmentReplaceMenuProvider.$inject = [
     'popupMenu'
 ];
 
-FragmentReplaceMenuProvider.prototype.getPopupMenuEntries = function(element) {
-    return function(entries) {
+FragmentReplaceMenuProvider.prototype.getPopupMenuEntries = function (element) {
+    return function (entries) {
         if (is(element, 'bpmn:Event')) {
             delete entries['replace-with-none-end'];
             delete entries['replace-with-escalation-intermediate-throw'];
@@ -38,8 +38,8 @@ FragmentReplaceMenuProvider.prototype.getPopupMenuEntries = function(element) {
     }
 }
 
-FragmentReplaceMenuProvider.prototype.getPopupMenuHeaderEntries = function(element) {
-    return function(entries) {
+FragmentReplaceMenuProvider.prototype.getPopupMenuHeaderEntries = function (element) {
+    return function (entries) {
         if (is(element, 'bpmn:Activity')) {
             return {};
         } else {
