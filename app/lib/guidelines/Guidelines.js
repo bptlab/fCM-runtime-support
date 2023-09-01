@@ -1,6 +1,11 @@
-import { is } from '../datamodelmodeler/util/ModelUtil';
-import { type } from '../util/Util';
-import { getClassDependencies, getClassDependents, getConnectedByExistentialAssociation, getConnectedElements, startDoCreation } from './GuidelineUtils';
+import {is} from '../datamodelmodeler/util/ModelUtil';
+import {type} from '../util/Util';
+import {
+    getClassDependencies,
+    getClassDependents,
+    getConnectedByExistentialAssociation,
+    getConnectedElements
+} from './GuidelineUtils';
 
 export const SEVERITY = {
     ERROR : {
@@ -27,22 +32,22 @@ SEVERITY.filter = function(lambda) {
 
 export default [
     {
-       title : 'GS2: Include all relevant data objects in the goal',
-       id : 'GS2',
+       title : 'TC2: Include all relevant data objects in the Termination Condition',
+       id : 'TC2',
        getViolations(mediator) {
-           const hook = mediator.goalStateModelerHook;
+           const hook = mediator.terminationConditionModelerHook;
            const literals = hook.modeler.getLiterals();
            if (literals && literals.length === 0) {
                return [{
                    element : hook.getRootObject(),
-                   message : 'Please include at least one data object configuration as literal in the goal state.'
+                   message : 'Please include at least one data object configuration as literal in the termination condition.'
                }];
            } else {
                return [];
            }
        },
        severity : SEVERITY.ERROR,
-       link : 'https://github.com/bptlab/fCM-design-support/wiki/Goal-State#gs2---include-all-relevant-data-objects-in-the-goal-state'
+       link : 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Termination-Condition#tc2---include-all-relevant-data-objects-in-the-goal-state'
     },
     {
         title: 'F9: Do not use gateways at the beginning of a fragment',
@@ -56,7 +61,7 @@ export default [
             }));
         },
         severity: SEVERITY.ERROR,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f9---do-not-use-gateways-at-the-beginning-of-a-fragment'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f9---do-not-use-gateways-at-the-beginning-of-a-fragment'
     },
     {
         title: 'F3: Use at least one activity for a fragment',
@@ -77,7 +82,7 @@ export default [
             }));
         },
         severity: SEVERITY.ERROR,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f3---use-at-least-one-activity-for-a-fragment'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f3---use-at-least-one-activity-for-a-fragment'
     },
     {
         title: 'F11: Label notations elements',
@@ -91,7 +96,7 @@ export default [
             }));
         },
         severity: SEVERITY.ERROR,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f11---label-notation-elements'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f11---label-notation-elements'
     },
     {
         title: 'F11.1: No empty states for data objects',
@@ -106,7 +111,7 @@ export default [
             }));
         },
         severity: SEVERITY.WARNING,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f11---label-notation-elements'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f11---label-notation-elements'
     },
     {
         title : 'Use states instead of attributes for important data changes',
@@ -120,7 +125,7 @@ export default [
             }));
         },
         severity : SEVERITY.INFORMATION,
-        link : 'https://github.com/bptlab/fCM-design-support/wiki/Data-Model#d5---use-states-instead-of-attributes-for-important-data-changes'
+        link : 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Data-Model#d5---use-states-instead-of-attributes-for-important-data-changes'
     },
     {
         title: 'F4: Use data objects to model pre- and postconditions',
@@ -147,7 +152,7 @@ export default [
             }));
         },
         severity: SEVERITY.WARNING,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f4---use-data-objects-to-model-pre--and-postconditions'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f4---use-data-objects-to-model-pre--and-postconditions'
     },
     {
         title: 'F6A: Use at least one start event',
@@ -165,7 +170,7 @@ export default [
             }
         },
         severity: SEVERITY.ERROR,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f6---use-start-events-only-in-initial-fragments'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f6---use-start-events-only-in-initial-fragments'
     },
     {
         title: 'F6B: Use multiple start events carefully',
@@ -183,7 +188,7 @@ export default [
             }
         },
         severity: SEVERITY.INFORMATION,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f6---use-start-events-only-in-initial-fragments'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f6---use-start-events-only-in-initial-fragments'
     },
     {
         title: 'F6C: Start fragment does not create case class',
@@ -222,7 +227,7 @@ export default [
             });
         },
         severity: SEVERITY.ERROR,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Fragments#f6---use-start-events-only-in-initial-fragments'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Fragments#f6---use-start-events-only-in-initial-fragments'
     },    
     {
         title : 'Have each fragment state transition in olc',
@@ -311,7 +316,7 @@ export default [
             });
         },
         severity : SEVERITY.ERROR,
-        link : 'https://github.com/bptlab/fCM-design-support/wiki/Consistency#c3---use-state-labels-and-state-transitions-of-data-objects-consistently-in-olcs-and-fragments'
+        link : 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Consistency#c3---use-state-labels-and-state-transitions-of-data-objects-consistently-in-olcs-and-fragments'
     },
     {
         title: 'C5: Provide existential objects',
@@ -358,7 +363,7 @@ export default [
             });
         },
         severity: SEVERITY.ERROR,
-        link: 'https://github.com/bptlab/fCM-design-support/wiki/Consistency#c5---provide-context-data-objects-from-data-model-on-data-object-creation-in-fragments'
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Consistency#c5---provide-context-data-objects-from-data-model-on-data-object-creation-in-fragments'
     },
     {
         title : 'Specify a Case Class.',
@@ -389,7 +394,7 @@ export default [
             }
         },
         severity : SEVERITY.ERROR,
-        link : 'https://github.com/bptlab/fCM-design-support/wiki/Data-Model#d2---specify-a-case-class'
+        link : 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Data-Model#d2---specify-a-case-class'
     },
     {
         title : 'Connect the Case Class to Every Other Class.',
@@ -418,6 +423,116 @@ export default [
 
         },
         severity : SEVERITY.ERROR,
-        link : 'https://github.com/bptlab/fCM-design-support/wiki/Data-Model#d3---connect-the-case-class-to-every-other-class'
+        link : 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Data-Model#d3---connect-the-case-class-to-every-other-class'
     },
+    {
+        title: 'Check if all Objectives are reachable from the first Objective.',
+        id: 'DEP2',
+        getViolations(mediator) {
+            const dependencyModeler = mediator.dependencyModelerHook.modeler;
+            const elements = dependencyModeler.get('elementRegistry').getAll();
+            const visited = new Set();
+            const unreachable = new Set();
+
+            function dfs(element) {
+                visited.add(element);
+
+                const outgoingDependencies = element.outgoing.filter(connection => connection.type === 'dep:Dependency');
+                for (let i = 0; i < outgoingDependencies.length; i++) {
+                    const targetElement = outgoingDependencies[i].target;
+                    if (!visited.has(targetElement)) {
+                        dfs(targetElement);
+                    }
+                }
+            }
+
+            const startState = elements.find(element => element.id === 'start_state');
+            dfs(startState);
+
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                if (is(element, 'dep:Objective')) {
+                    if (!visited.has(element)) {
+                        unreachable.add(element);
+                    }
+                }
+            }
+
+            if (unreachable.size > 0) {
+                const violations = [...unreachable].map(element => {
+                    return {
+                        element: element,
+                        message: 'This Objective is not reachable from the first State.'
+                    };
+                });
+                return violations;
+            } else {
+                return [];
+            }
+        },
+        severity: SEVERITY.WARNING,
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Dependency-Model#dep2---check-if-all-objectives-are-reachable-from-the-start-state'
+    },
+    {
+        title : 'Connect the first Objective to one other Objective.',
+        id : 'DEP3',
+        getViolations(mediator) {
+            const dependencyModeler = mediator.dependencyModelerHook.modeler;
+            const dependencies = dependencyModeler.get('elementRegistry').getAll().filter(element => is(element, 'dep:Dependency'));
+            const dependenciesFromStartState = dependencies.filter(element => element.source.id === 'start_state');
+
+            if (dependenciesFromStartState.length === 0) {
+                return [{
+                    element : mediator.dependencyModelerHook.getRootObject(),
+                    message : 'Please connect the first Objective to one other Objective.'
+                }];
+            } else {
+                return [];
+            }
+        },
+        severity : SEVERITY.ERROR,
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Dependency-Model#dep3---include-the-start-state-into-the-dependency-graph'
+    },
+    {
+        title: 'Do not create cycles in the Dependency Modeler.',
+        id: 'DEP4',
+        getViolations(mediator) {
+            const dependencyModeler = mediator.dependencyModelerHook.modeler;
+            const elements = dependencyModeler.get('elementRegistry').getAll();
+            const visited = new Set();
+            const stack = new Set();
+            const violations = [];
+    
+            function detectCycle(element) {
+                visited.add(element);
+                stack.add(element);
+    
+                const outgoingDependencies = element.outgoing.filter(connection => connection.type === 'dep:Dependency');
+                for (let i = 0; i < outgoingDependencies.length; i++) {
+                    const targetElement = outgoingDependencies[i].target;
+                    if (!visited.has(targetElement)) {
+                        detectCycle(targetElement);
+                    } else if (stack.has(targetElement)) {
+                        violations.push({
+                            element: targetElement,
+                            message: 'Please do not create cycles in the Dependency Modeler.'
+                        });
+                    }
+                }
+    
+                stack.delete(element);
+            }
+    
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                if (!visited.has(element)) {
+                    detectCycle(element);
+                }
+            }
+    
+            return violations;
+        },
+        severity: SEVERITY.ERROR,
+        link: 'https://github.com/Noel-Bastubbe/for-Construction-Modeling/wiki/Dependency-Model#dep4---mind-cyclic-dependencies'
+    }, 
 ]

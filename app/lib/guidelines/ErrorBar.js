@@ -1,5 +1,5 @@
-import { openAsOverlay } from "../util/HtmlUtil";
-import { type } from "../util/Util";
+import {openAsOverlay} from "../util/HtmlUtil";
+import {type} from "../util/Util";
 
 //TODO rename to "ViolationBar" or similar, as only one severity is about errors
 
@@ -65,6 +65,7 @@ export default class ErrorBar {
         const display = document.createElement('span');
         display.innerHTML = severity.label + ': ' + number;
         display.classList.add('barButton');
+        display.classList.add('barContent');
         this.numberOfViolations.appendChild(display);
         return display;
     }

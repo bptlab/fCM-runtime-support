@@ -1,19 +1,13 @@
-import {
-  every
-} from 'min-dash';
+import {every} from 'min-dash';
 
 import inherits from 'inherits';
 
-import {
-  is
-} from '../../util/ModelUtil';
+import {is} from '../../util/ModelUtil';
 
-import {
-  isLabel
-} from '../../util/LabelUtil';
+import {isLabel} from '../../util/LabelUtil';
 
 import RuleProvider from 'diagram-js/lib/features/rules/RuleProvider';
-import { isAny } from '../modeling/util/ModelingUtil';
+import {isAny} from '../modeling/util/ModelingUtil';
 
 
 /**
@@ -200,11 +194,11 @@ function nonExistingOrLabel(element) {
   return !element || isLabel(element);
 }
 
-
-function canConnect(source, target) {
+  function canConnect(source, target) {
   if (nonExistingOrLabel(source) || nonExistingOrLabel(target)) {
     return null;
   }
+
   if (canConnectLink(source, target)) {
     return { type: 'od:Association' };
   }
