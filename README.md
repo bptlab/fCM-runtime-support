@@ -42,7 +42,24 @@ npx tsc
 ## Usage
 There is a [demo video](https://www.youtube.com/watch?v=bIDZUYBNms0) and a [use case tutorial](/.docs/Tutorial.md) to showcase how to use the initial fcm-js without extensions.
 
-...
+In the top right corner, users can switch between the different modelers for fCM. The Fragment Modeler allows to model the process fragments that define the activities and their ordering constraints. Activities may specify a duration, a role, and a capacity. The expected duration is a fixed number of time units, the role corresponds to a role model, and the capacity determines how many resources of the specified role are required to execute the activity.
+<img width="1439" alt="Screenshot 2023-09-03 at 08 11 06" src="https://github.com/bptlab/fCM-design-support/assets/32839252/ecddd337-25d8-4b3e-9280-7d6868ba2486">
+
+The Data Model allows to specify the data classes and their relation in the process.
+<img width="1440" alt="Screenshot 2023-09-03 at 08 11 18" src="https://github.com/bptlab/fCM-design-support/assets/32839252/a24caab2-5374-47f4-9b67-54a287215fa4">
+
+The Object Life-Cycles (OLCs) describe the states and their transitions for every class of the data model.
+<img width="1440" alt="Screenshot 2023-09-03 at 08 11 39" src="https://github.com/bptlab/fCM-design-support/assets/32839252/857b3651-77d8-4e44-b581-e83f7a3e50e4">
+
+The Role Model allows for defining the possible roles for activities.
+<img width="1440" alt="Screenshot 2023-09-03 at 08 11 53" src="https://github.com/bptlab/fCM-design-support/assets/32839252/4ec26c5e-3eb0-4644-b9ef-1bac8fcf5ff9">
+
+The Resource Model allows to specify the available resources for the case. A resource may belong to multiple roles. It can have a capacity and an availability to specify if the resource incorporates multiple available resources and if there is a limited availability over time.
+<img width="1440" alt="Screenshot 2023-09-03 at 08 12 04" src="https://github.com/bptlab/fCM-design-support/assets/32839252/b197f704-fc8e-4855-aef7-5696616ff110">
+
+The Termination Condition states a logic expression under which the case can be terminated.
+<img width="1440" alt="Screenshot 2023-09-03 at 08 12 14" src="https://github.com/bptlab/fCM-design-support/assets/32839252/57362aa9-5b15-4798-9228-e639530803c8">
+
 
 ## License
 
