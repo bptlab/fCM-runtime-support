@@ -22,7 +22,7 @@ deployOnDockerHost:
     - docker1-shell
   script:
     - docker login -u bot_user -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker container ls -al | grep fcm-design-support && docker container rm -f fcm-design-support
+    - docker ps -q --filter "name=fcm-design-support" | grep -q . && docker stop fcm-design-support && docker rm fcm-design-support
     - > 
       docker run 
       -d
