@@ -13,9 +13,9 @@ import $ from 'jquery';
 import Mediator from './lib/mediator/Mediator';
 import Checker from './lib/guidelines/Checker';
 import ErrorBar from './lib/guidelines/ErrorBar';
-import {download, upload} from './lib/util/FileUtil';
+import { download, upload } from './lib/util/FileUtil';
 import getDropdown from "./lib/util/Dropdown";
-import {classes as domClasses} from 'min-dom';
+import { classes as domClasses } from 'min-dom';
 
 import conferenceProcess from '../resources/conferenceModel/process.bpmn';
 import conferenceDataModel from '../resources/conferenceModel/datamodel.xml';
@@ -23,10 +23,7 @@ import conferenceOLC from '../resources/conferenceModel/olc.xml';
 import conferenceTerminationCondition from '../resources/conferenceModel/terminationCondition.xml';
 
 import Zip from 'jszip';
-import {appendOverlayListeners} from "./lib/util/HtmlUtil";
-
-import {exportExecutionPlan} from "../dist/excelExporter/ExcelExporter.js";
-import {ModelObjectParser} from "../planner/parser/ModelObjectParser";
+import { appendOverlayListeners } from "./lib/util/HtmlUtil";
 
 const constructionMode = false; // Set to true for renaming modelers for user study and removing termination condition modeler
 const LOAD_DUMMY = false; // Set to true to load conference example data
@@ -82,7 +79,7 @@ var objectiveModeler = new ObjectiveModeler({
 
 var fragmentModeler = new FragmentModeler({
     container: '#fragments-canvas',
-    keyboard: {bindTo: document.querySelector('#fragments-canvas')},
+    keyboard: { bindTo: document.querySelector('#fragments-canvas') },
     additionalModules: [{
         __init__: ['mediator'],
         mediator: ['type', mediator.FragmentModelerHook]
@@ -91,7 +88,7 @@ var fragmentModeler = new FragmentModeler({
 
 var roleModeler = new RoleModeler({
     container: '#rolemodel-canvas',
-    keyboard: {bindTo: document.querySelector('#rolemodel-canvas')},
+    keyboard: { bindTo: document.querySelector('#rolemodel-canvas') },
     additionalModules: [{
         __init__: ['mediator'],
         mediator: ['type', mediator.RoleModelerHook]
@@ -120,9 +117,9 @@ const checker = new Checker(mediator, errorBar);
 var currentModeler = fragmentModeler;
 
 mediator.getModelers().forEach(modeler => {
-        var header = document.getElementById("title" + modeler.id);
-        header.innerHTML = modeler.name(constructionMode);
-    }
+    var header = document.getElementById("title" + modeler.id);
+    header.innerHTML = modeler.name(constructionMode);
+}
 )
 
 async function loadDebugData() {
@@ -131,7 +128,7 @@ async function loadDebugData() {
     zip.file('dataModel.xml', conferenceDataModel);
     zip.file('olcs.xml', conferenceOLC);
     zip.file('terminationCondition.xml', conferenceTerminationCondition);
-    await importFromZip(zip.generateAsync({type: 'base64'}));
+    await importFromZip(zip.generateAsync({ type: 'base64' }));
 }
 
 async function createNewDiagram() {
@@ -172,28 +169,28 @@ Array.from(document.getElementsByClassName("canvas")).forEach(element => {
 
 async function exportToZip() {
     const zip = new Zip();
-    const fragments = (await fragmentModeler.saveXML({format: true})).xml;
+    const fragments = (await fragmentModeler.saveXML({ format: true })).xml;
     zip.file('fragments.bpmn', fragments);
-    const dataModel = (await dataModeler.saveXML({format: true})).xml;
+    const dataModel = (await dataModeler.saveXML({ format: true })).xml;
     zip.file('dataModel.xml', dataModel);
-    const objectiveModel = (await objectiveModeler.saveXML({format: true})).xml;
+    const objectiveModel = (await objectiveModeler.saveXML({ format: true })).xml;
     zip.file('objectiveModel.xml', objectiveModel);
-    const olcs = (await olcModeler.saveXML({format: true})).xml;
+    const olcs = (await olcModeler.saveXML({ format: true })).xml;
     zip.file('olcs.xml', olcs);
-    const resourceModel = (await resourceModeler.saveXML({format: true})).xml;
+    const resourceModel = (await resourceModeler.saveXML({ format: true })).xml;
     zip.file('resourceModel.xml', resourceModel);
-    const terminationCondition = (await terminationConditionModeler.saveXML({format: true})).xml;
+    const terminationCondition = (await terminationConditionModeler.saveXML({ format: true })).xml;
     zip.file('terminationCondition.xml', terminationCondition);
-    const dependencyModel = (await dependencyModeler.saveXML({format: true})).xml;
+    const dependencyModel = (await dependencyModeler.saveXML({ format: true })).xml;
     zip.file('dependencyModel.xml', dependencyModel);
-    const roleModel = (await roleModeler.saveXML({format: true})).xml;
+    const roleModel = (await roleModeler.saveXML({ format: true })).xml;
     zip.file('roleModel.xml', roleModel);
-    return zip.generateAsync({type: 'base64'});
+    return zip.generateAsync({ type: 'base64' });
 }
 
 async function importFromZip(zipData) {
     checker.deactivate();
-    const zip = await Zip.loadAsync(zipData, {base64: true});
+    const zip = await Zip.loadAsync(zipData, { base64: true });
     const files = {
         fragments: zip.file('fragments.bpmn'),
         dataModel: zip.file('dataModel.xml'),
@@ -221,23 +218,8 @@ async function importFromZip(zipData) {
 }
 
 export async function planButtonAction() {
-    const modelObjectParser = new ModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
-    const planner = modelObjectParser.createPlanner();
-    let executionLog = planner.generatePlan();
-    let blob = await exportExecutionPlan(executionLog);
-
-    const url = window.URL.createObjectURL(blob);
-
-    // Create a link element
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Execution Plan.xlsx';
-
-    // Programmatically click the link to initiate the download
-    link.click();
-
-    // Clean up the temporary URL
-    window.URL.revokeObjectURL(url);
+    // TODO: ask service to generate schedule
+    console.log("you wanna create a schedule? ask the service!")
 }
 
 // IO Buttons
@@ -437,7 +419,7 @@ mediator.focus = function (modeler) {
 
 window.mediator = mediator;
 window.export = function (modeler) {
-    modeler.saveXML({format: true}).then(result => {
+    modeler.saveXML({ format: true }).then(result => {
         download('foobar.xml', result.xml);
     });
 }
