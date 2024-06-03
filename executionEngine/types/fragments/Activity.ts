@@ -4,7 +4,7 @@ import { DataObjectInstanceLink } from "../objects/DataObjectInstanceLink";
 import { DataObjectInstanceWithState } from "../objects/DataObjectInstanceWithState";
 import { Action } from "../Action";
 import { ExecutionState } from "../ExecutionState";
-import { cartesianProduct } from "../../../../fCM-design-support/planner/Util";
+import { cartesianProduct } from "../../../util/Util";
 
 /**
  * Represents an activity that was modeled in the Fragment Modeler.

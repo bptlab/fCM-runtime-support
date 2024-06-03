@@ -4,7 +4,7 @@ import {Instance} from "../executionState/Instance";
 import {Action} from "../executionState/Action";
 import {ExecutionState} from "../executionState/ExecutionState";
 import {Role} from "../Role";
-import {cartesianProduct} from "../../Util";
+import {cartesianProduct} from "../../../util/Util";
 import {InstanceLink} from "../executionState/InstanceLink";
 import {StateInstance} from "../executionState/StateInstance";
 
