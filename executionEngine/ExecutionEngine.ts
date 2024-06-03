@@ -24,8 +24,9 @@ export class ExecutionEngine {
      * Returns the names of currently enabled activities.
      */
     getEnabledActivities(): string[] {
-        // TODO: find enabled activities in current state
-        return [];
+        return this.activities
+            .filter(activity => activity.isEnabled(this.currentState))
+            .map(enabledActivity => enabledActivity.name);
     }
 
     /**

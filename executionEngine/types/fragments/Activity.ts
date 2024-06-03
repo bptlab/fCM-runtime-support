@@ -39,9 +39,19 @@ export class Activity {
     }
 
     /**
-     * Aggregates all possible inputs (combination of {@link DataObjectInstanceWithState} elements) for this activity.
+     * Returns whether this activity is enabled in a given {@link ExecutionState}.
+     * In other words, is there a constellation of objects that enables the activity?
      */
-    private getPossibleInputs(executionState: ExecutionState): any[] {
+    public isEnabled(executionState: ExecutionState): boolean {
+        const possibleInputs: DataObjectInstanceWithState[] = this.getPossibleInputs(executionState);
+        return possibleInputs && possibleInputs.length > 0;
+    }
+
+    /**
+     * Aggregates all possible inputs (usable {@link DataObjectInstanceWithState} elements) for this activity.
+     * Note that all input sets need to be checked.
+     */
+    private getPossibleInputs(executionState: ExecutionState): DataObjectInstanceWithState[] {
         let possibleStateInstances: DataObjectInstanceWithState[][] = [];
         for (let dataObjectReference of this.inputSet.set) {
             let matchingStateInstances = executionState.currentStateInstances.filter(stateInstance =>
