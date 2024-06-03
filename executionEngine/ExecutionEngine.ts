@@ -1,6 +1,7 @@
 import { ExecutionState } from "./types/ExecutionState";
 import { Activity } from "./types/fragments/Activity";
 import { Action } from "./types/Action";
+import { DataObjectInstanceWithState } from "./types/objects/DataObjectInstanceWithState";
 
 /**
  * Engine for executing activities with their related data objects.
@@ -38,8 +39,23 @@ export class ExecutionEngine {
             // unknown activity
             return [];
         }
-        // TODO: find suitable objects in state
-        return [];
+
+        // Aggregate all groups of objects that can be used for executing the activity.
+        // For now, just use the name of the objects involved.
+        const relatedObjectGroupsForActivity: string[][] = [];
+        const inputCombinations: DataObjectInstanceWithState[][] = activityToExecute.getPossibleInputCombinations(this.currentState);
+        for (const inputCombination of inputCombinations) {
+            // For each possible input combination start a new object group in the output.
+            const objectGroup: string[] = [];
+            for (const inputObject of inputCombination) {
+                // The object itself is usable for executing the activity.
+                objectGroup.push(inputObject.instance.name);
+                // TODO: also retrieve objects that related to the input objects (see sketch of popover idea)?
+            }
+            relatedObjectGroupsForActivity.push(objectGroup);
+        }
+
+        return relatedObjectGroupsForActivity;
     }
 
     private findActivityActionReferencedByObjectGroup(activityToExecute: Activity, objectGroup: string[]): Action | undefined {

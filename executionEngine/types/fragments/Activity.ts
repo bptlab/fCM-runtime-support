@@ -28,9 +28,9 @@ export class Activity {
         const needsInput: boolean = this.inputSet.set.length > 0;
 
         if (needsInput) {
-            const inputs: any[] = this.getPossibleInputs(executionState);
-            for (const input of inputs) {
-                actions.push(this.getActionForInput([...input], executionState));
+            const inputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
+            for (const inputCombination of inputCombinations) {
+                actions.push(this.getActionForInput([...inputCombination], executionState));
             }
         } else {
             actions.push(this.getActionForInput([], executionState));
@@ -40,18 +40,18 @@ export class Activity {
 
     /**
      * Returns whether this activity is enabled in a given {@link ExecutionState}.
-     * In other words, is there a constellation of objects that enables the activity?
+     * In other words, is there a combination of objects that enables the activity?
      */
     public isEnabled(executionState: ExecutionState): boolean {
-        const possibleInputs: DataObjectInstanceWithState[] = this.getPossibleInputs(executionState);
-        return possibleInputs && possibleInputs.length > 0;
+        const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
+        return possibleInputCombinations && possibleInputCombinations.length > 0;
     }
 
     /**
-     * Aggregates all possible inputs (usable {@link DataObjectInstanceWithState} elements) for this activity.
-     * Note that all input sets need to be checked.
+     * Aggregates all possible input combinations (combination of {@link DataObjectInstanceWithState} elements) for this activity.
+     * Note that, an input set can obviously contain different object references, which need to be checked and that leads to the combinations.
      */
-    private getPossibleInputs(executionState: ExecutionState): DataObjectInstanceWithState[] {
+    public getPossibleInputCombinations(executionState: ExecutionState): DataObjectInstanceWithState[][] {
         const possibleStateInstances: DataObjectInstanceWithState[][] = [];
         for (const dataObjectReference of this.inputSet.set) {
             const matchingStateInstances = executionState.currentStateInstances.filter(stateInstance =>
