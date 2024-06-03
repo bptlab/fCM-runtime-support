@@ -21,21 +21,21 @@ export class Activity {
     }
 
     /**
+     * Returns whether the activity specifies an empty input set.
+     */
+    private needsNoInput(): boolean {
+        return this.inputSet.set.length === 0;
+    }
+
+    /**
      * Based on a concrete {@link ExecutionState}, returns the possible execution {@link Action}s for this activity.
      */
     public getActions(executionState: ExecutionState): Action[] {
-        const actions: Action[] = [];
-        const needsInput: boolean = this.inputSet.set.length > 0;
-
-        if (needsInput) {
-            const inputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
-            for (const inputCombination of inputCombinations) {
-                actions.push(this.getActionForInput([...inputCombination], executionState));
-            }
-        } else {
-            actions.push(this.getActionForInput([], executionState));
+        if (this.needsNoInput()) {
+            return [this.getActionForInput([], executionState)];
         }
-        return actions;
+        const inputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
+        return inputCombinations.map(inputCombination => this.getActionForInput([...inputCombination], executionState));
     }
 
     /**
