@@ -31,8 +31,8 @@ export class Action {
      * Returns the concrete {@link DataObjectInstanceWithState} elements that were changed during the execution.
      */
     private getChangedExecutionDataObjectInstances(): DataObjectInstanceWithState[] {
-        let changedExecutionDataObjectInstances: DataObjectInstanceWithState[] = [];
-        for (let input of this.inputList) {
+        const changedExecutionDataObjectInstances: DataObjectInstanceWithState[] = [];
+        for (const input of this.inputList) {
             if (this.outputList.some(output => output.instance === input.instance)) {
                 changedExecutionDataObjectInstances.push(input);
             }

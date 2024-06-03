@@ -24,16 +24,16 @@ export class Activity {
      * Based on a concrete {@link ExecutionState}, returns the possible execution {@link Action}s for this activity.
      */
     public getActions(executionState: ExecutionState): Action[] {
-        let actions: Action[] = [];
-        let needsInput: boolean = this.inputSet.set.length > 0;
+        const actions: Action[] = [];
+        const needsInput: boolean = this.inputSet.set.length > 0;
 
         if (needsInput) {
-          let inputs: any[] = this.getPossibleInputs(executionState);
-          for (let input of inputs) {
-            actions.push(this.getActionForInput([...input], executionState));
-          }
+            const inputs: any[] = this.getPossibleInputs(executionState);
+            for (const input of inputs) {
+                actions.push(this.getActionForInput([...input], executionState));
+            }
         } else {
-          actions.push(this.getActionForInput([], executionState));
+            actions.push(this.getActionForInput([], executionState));
         }
         return actions;
     }
@@ -52,9 +52,9 @@ export class Activity {
      * Note that all input sets need to be checked.
      */
     private getPossibleInputs(executionState: ExecutionState): DataObjectInstanceWithState[] {
-        let possibleStateInstances: DataObjectInstanceWithState[][] = [];
-        for (let dataObjectReference of this.inputSet.set) {
-            let matchingStateInstances = executionState.currentStateInstances.filter(stateInstance =>
+        const possibleStateInstances: DataObjectInstanceWithState[][] = [];
+        for (const dataObjectReference of this.inputSet.set) {
+            const matchingStateInstances = executionState.currentStateInstances.filter(stateInstance =>
                 dataObjectReference.isMatchedBy(stateInstance)
             );
             possibleStateInstances.push(matchingStateInstances);
@@ -67,8 +67,8 @@ export class Activity {
      * returns the action that is associated with executing the activity with the given input objects.
      */
     private getActionForInput(inputList: DataObjectInstanceWithState[], executionState: ExecutionState) {
-        let outputList = this.getOutputForInput(inputList, executionState);
-        let addedLinks = this.getAddedLinks(inputList.map(input => input.instance), outputList.map(output => output.instance));
+        const outputList = this.getOutputForInput(inputList, executionState);
+        const addedLinks = this.getAddedLinks(inputList.map(input => input.instance), outputList.map(output => output.instance));
         return new Action(this, inputList, outputList, addedLinks);
     }
 
@@ -78,13 +78,13 @@ export class Activity {
      */
     private getOutputForInput(inputList: DataObjectInstanceWithState[], executionState: ExecutionState): DataObjectInstanceWithState[] {
         return this.outputSet.set.map(output => {
-            let stateInstance: DataObjectInstanceWithState | undefined = inputList.find(stateInstance =>
+            const stateInstance: DataObjectInstanceWithState | undefined = inputList.find(stateInstance =>
                 stateInstance.instance.dataclass === output.dataclass
             );
             if (stateInstance) {
                 return new DataObjectInstanceWithState(stateInstance.instance, output.state);
             } else {
-                let newInstance: DataObjectInstance = executionState.getNewInstanceOfClass(output.dataclass);
+                const newInstance: DataObjectInstance = executionState.getNewInstanceOfClass(output.dataclass);
                 return new DataObjectInstanceWithState(newInstance, output.state);
             }
         });
@@ -100,8 +100,8 @@ export class Activity {
         const readInstances: DataObjectInstance[] = inputList.filter(inputEntry => !outputList.find(outputEntry => inputEntry.dataclass === outputEntry.dataclass));
         const allInstances: DataObjectInstance[] = outputList.concat(readInstances);
 
-        for (let addedInstance of addedInstances) {
-            for (let instance of allInstances) {
+        for (const addedInstance of addedInstances) {
+            for (const instance of allInstances) {
                 if (addedInstance != instance) {
                     addedLinks.push(new DataObjectInstanceLink(addedInstance, instance));
                 }
