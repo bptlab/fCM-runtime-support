@@ -71,6 +71,8 @@ FragmentModeler.prototype.handleRoleRenamed = function (role) {
     );
 }
 
+FragmentModeler.prototype.saveXML = this.saveXML
+
 FragmentModeler.prototype.handleRoleDeleted = function (role) {
     this.getTasksWithRole(role).forEach((element, gfx) => {
         element.businessObject.role = undefined;

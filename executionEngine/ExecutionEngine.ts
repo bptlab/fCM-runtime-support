@@ -2,6 +2,7 @@ import { ExecutionState } from "./types/ExecutionState";
 import { Activity } from "./types/fragments/Activity";
 import { Action } from "./types/Action";
 import { DataObjectInstanceWithState } from "./types/objects/DataObjectInstanceWithState";
+import ExecutionMediator from "./ExecutionMediator";
 
 /**
  * Engine for executing activities with their related data objects.
@@ -10,11 +11,13 @@ export class ExecutionEngine {
     currentState: ExecutionState;
     activities: Activity[];
     executionHistory: Action[];
+    mediator: ExecutionMediator;
 
-    public constructor(currentState: ExecutionState, activities: Activity[]) {
+    public constructor(currentState: ExecutionState, activities: Activity[], mediator: ExecutionMediator) {
         this.currentState = currentState;
         this.activities = activities;
         this.executionHistory = [];
+        this.mediator = mediator;
     }
 
     private findActivityWithName(activityName: string): Activity | undefined {
