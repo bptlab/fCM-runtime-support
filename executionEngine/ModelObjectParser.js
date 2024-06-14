@@ -1,14 +1,14 @@
 import { is } from "bpmn-js/lib/util/ModelUtil";
-import { ExecutionEngine } from "./ExecutionEngine";
-import { ExecutionState } from "./types/ExecutionState";
-import { Activity } from "./types/fragments/Activity";
-import { IOSet } from "./types/fragments/IOSet";
-import { DataObjectClass } from "./types/objects/DataObjectClass";
-import { DataObjectInstance } from "./types/objects/DataObjectInstance";
-import { DataObjectInstanceWithState } from "./types/objects/DataObjectInstanceWithState";
-import { DataObjectInstanceLink } from "./types/objects/DataObjectInstanceLink";
-import { DataObjectReference } from "./types/fragments/DataObjectReference";
-import { cartesianProduct } from "../util/Util";
+import { ExecutionEngine } from "../dist/executionEngine/ExecutionEngine";
+import { ExecutionState } from "../dist/executionEngine/types/ExecutionState";
+import { Activity } from "../dist/executionEngine/types/fragments/Activity";
+import { IOSet } from "../dist/executionEngine/types/fragments/IOSet";
+import { DataObjectClass } from "../dist/executionEngine/types/objects/DataObjectClass";
+import { DataObjectInstance } from "../dist/executionEngine/types/objects/DataObjectInstance";
+import { DataObjectInstanceWithState } from "../dist/executionEngine/types/objects/DataObjectInstanceWithState";
+import { DataObjectInstanceLink } from "../dist/executionEngine/types/objects/DataObjectInstanceLink";
+import { DataObjectReference } from "../dist/executionEngine/types/fragments/DataObjectReference";
+import { cartesianProduct } from "../dist/util/Util";
 
 /**
  * Based on the Data (Class) modeler, the Fragment Modeler and the Data (Object) Modeler,
