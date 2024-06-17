@@ -108,7 +108,7 @@ export class ModelObjectParser {
                 const objectReferencesOfClass = [];
                 // For each data object class, there might be multiple states that can be part of an input set.
                 for (let stateIndex = 0; stateIndex < rootElementForAssociationsOfClass.states.length; stateIndex++) {
-                    dataInputAssociationToClass.push(new DataObjectReference(
+                    objectReferencesOfClass.push(new DataObjectReference(
                         this.dataObjectClasses.find(dataclass =>
                             dataclass.id === rootElementForAssociationsOfClass.dataclass.id
                         ),
