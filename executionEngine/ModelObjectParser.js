@@ -165,7 +165,7 @@ export class ModelObjectParser {
             const outputSet = this._parseOutputSet(modelActivity);
             return inputSets.map(inputSet => new Activity(
                 modelActivity.name,
-                new IOSet([...inputSet]),
+                new IOSet([].concat(inputSet)),
                 new IOSet(outputSet)
             ));
         });
