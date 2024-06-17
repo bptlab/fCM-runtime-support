@@ -26,8 +26,12 @@ import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {exportExecutionPlan} from "../dist/planner/excelExporter/ExcelExporter.js";
-import {ModelObjectParser} from "../planner/parser/ModelObjectParser";
-
+import {ModelObjectParser} from "../executionEngine/ModelObjectParser";
+import ExecutionFragmentInterface from "./lib/executioninterface/FragmentInterface";
+import ExecutionObjectInterface from "./lib/executioninterface/ObjectInterface";
+import ExecutionInterface from "./lib/executioninterface/ExecutionInterface";
+import ExecutionMediator from "../dist/executionEngine/ExecutionMediator";
+import ModelerData from "../dist/executionEngine/ModelerData";
 const constructionMode = false; // Set to true for renaming modelers for user study and removing termination condition modeler
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -114,16 +118,31 @@ var terminationConditionModeler = new TerminationConditionModeler(
 );
 new mediator.TerminationConditionModelerHook(terminationConditionModeler);
 
+const modelerData = new ModelerData(fragmentModeler, olcModeler, dataModeler, dependencyModeler, objectiveModeler);
+
+var executionFragmentInterface = new ExecutionFragmentInterface({
+  container: "#execution-fragment-interface-canvas",
+  keyboard: {
+    bindTo: document.querySelector("#execution-fragment-interface-canvas"),
+  },
+  modelerData: modelerData,
+});
+
+var executionObjectInterface = new ExecutionObjectInterface({
+  container: "execution-object-interface-canvas",
+})
+
+var executionInterface = new ExecutionInterface(executionFragmentInterface, executionObjectInterface);
 
 const errorBar = new ErrorBar(document.getElementById("errorBar"), mediator);
 const checker = new Checker(mediator, errorBar);
 var currentModeler = fragmentModeler;
 
-mediator.getModelers().forEach(modeler => {
-        var header = document.getElementById("title" + modeler.id);
-        header.innerHTML = modeler.name(constructionMode);
-    }
-)
+const modelers = [...mediator.getModelers(), executionInterface];
+modelers.forEach((modeler) => {
+  var header = document.getElementById("title" + modeler.id);
+  header.innerHTML = modeler.name(constructionMode);
+});
 
 async function loadDebugData() {
     const zip = new Zip();
@@ -173,6 +192,7 @@ Array.from(document.getElementsByClassName("canvas")).forEach(element => {
 async function exportToZip() {
     const zip = new Zip();
     const fragments = (await fragmentModeler.saveXML({format: true})).xml;
+    console.log(fragments)
     zip.file('fragments.bpmn', fragments);
     const dataModel = (await dataModeler.saveXML({format: true})).xml;
     zip.file('dataModel.xml', dataModel);
@@ -296,30 +316,47 @@ async function navigationDropdown() {
         return selectOlcMenu.contains(event.target);
     }
 
-    function repopulateDropdown() {
-        var modelers = mediator.getModelers();
-        modelers.sort((a, b) => {
-            return a.rank - b.rank
-        });
-        if (constructionMode) {
-            modelers = modelers.filter(object => object !== terminationConditionModeler);
-        }
-        var valueBefore = selectOlcComponent.value;
-        selectOlcMenu.populate(modelers, modeler => {
-            showModeler(modeler);
-            selectOlcComponent.showValue(modeler);
-            selectOlcMenu.hide();
-        }, undefined, modeler => modeler.name(constructionMode));
-        selectOlcComponent.showValue(valueBefore);
+  function repopulateDropdown() {
+    var modelers = mediator.getModelers();
+    // TODO replace with execution interface
+    modelers = [...modelers, executionInterface];
+    modelers.sort((a, b) => {
+      return a.rank - b.rank;
+    });
+    if (constructionMode) {
+      modelers = modelers.filter(
+        (object) => object !== terminationConditionModeler
+      );
     }
+    var valueBefore = selectOlcComponent.value;
+    selectOlcMenu.populate(
+      modelers,
+      async (modeler) => {
+        showModeler(modeler);
+        selectOlcComponent.showValue(modeler);
+        selectOlcMenu.hide();
+        // If the modeler is the execution interface, create a new execution mediator
+        if (modeler === executionInterface) {
+            const modelObjectParser = new ModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+            new ExecutionMediator(executionFragmentInterface, executionObjectInterface, modelerData, modelObjectParser);
+        }
+      },
+      undefined,
+      (modeler) => modeler.name(constructionMode)
+    );
+    selectOlcComponent.showValue(valueBefore);
+  }
 
-    function showModeler(modeler) {
-        if (modeler === terminationConditionModeler) {
-            focus(modeler._root.closest('.canvas'));
-        } else {
-            focus(modeler.get('canvas')._container.closest('.canvas'));
-        }
+  function showModeler(modeler) {
+    if (modeler === terminationConditionModeler) {
+      focus(ps._root.closest(".canvas"));
+    } if(modeler === executionInterface) {
+      focus(executionFragmentInterface.get("canvas")._container.closest(".canvas"));
     }
+     else {
+      focus(modeler.get("canvas")._container.closest(".canvas"));
+    }
+  }
 
     function showSelectOlcMenu() {
         const closeOverlay = appendOverlayListeners(selectOlcMenu);
