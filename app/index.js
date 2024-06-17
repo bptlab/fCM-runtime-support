@@ -26,13 +26,12 @@ import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {exportExecutionPlan} from "../dist/planner/excelExporter/ExcelExporter.js";
-import {ModelObjectParser} from "../planner/parser/ModelObjectParser";
+import {ModelObjectParser} from "../executionEngine/ModelObjectParser";
 import ExecutionFragmentInterface from "./lib/executioninterface/FragmentInterface";
 import ExecutionObjectInterface from "./lib/executioninterface/ObjectInterface";
 import ExecutionInterface from "./lib/executioninterface/ExecutionInterface";
-import ExecutionMediator from '../executionEngine/ExecutionMediator';
-import ModelerData from '../executionEngine/ModelerData';
-
+import ExecutionMediator from "../dist/executionEngine/ExecutionMediator";
+import ModelerData from "../dist/executionEngine/ModelerData";
 const constructionMode = false; // Set to true for renaming modelers for user study and removing termination condition modeler
 const LOAD_DUMMY = false; // Set to true to load conference example data
 const SHOW_DEBUG_BUTTONS = false; // Set to true to show additional buttons for debugging
@@ -118,7 +117,9 @@ var terminationConditionModeler = new TerminationConditionModeler(
     '#terminationcondition-canvas'
 );
 new mediator.TerminationConditionModelerHook(terminationConditionModeler);
-const modelerData = new ModelerData(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+
+const modelerData = new ModelerData(fragmentModeler, olcModeler, dataModeler, dependencyModeler, objectiveModeler);
+
 var executionFragmentInterface = new ExecutionFragmentInterface({
   container: "#execution-fragment-interface-canvas",
   keyboard: {
@@ -128,7 +129,7 @@ var executionFragmentInterface = new ExecutionFragmentInterface({
 });
 
 var executionObjectInterface = new ExecutionObjectInterface({
-  container: "#execution-object-interface-canvas",
+  container: "execution-object-interface-canvas",
 })
 
 var executionInterface = new ExecutionInterface(executionFragmentInterface, executionObjectInterface);
@@ -191,6 +192,7 @@ Array.from(document.getElementsByClassName("canvas")).forEach(element => {
 async function exportToZip() {
     const zip = new Zip();
     const fragments = (await fragmentModeler.saveXML({format: true})).xml;
+    console.log(fragments)
     zip.file('fragments.bpmn', fragments);
     const dataModel = (await dataModeler.saveXML({format: true})).xml;
     zip.file('dataModel.xml', dataModel);
@@ -333,11 +335,10 @@ async function navigationDropdown() {
         showModeler(modeler);
         selectOlcComponent.showValue(modeler);
         selectOlcMenu.hide();
-        if (
-          modeler === executionInterface
-        ) {
+        // If the modeler is the execution interface, create a new execution mediator
+        if (modeler === executionInterface) {
             const modelObjectParser = new ModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
-            const executionMediator = new ExecutionMediator(executionFragmentInterface, executionObjectInterface, modelerData, modelObjectParser);
+            new ExecutionMediator(executionFragmentInterface, executionObjectInterface, modelerData, modelObjectParser);
         }
       },
       undefined,

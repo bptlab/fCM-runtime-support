@@ -52,10 +52,6 @@ ExecutionFragmentInterface.prototype.name = function (constructionMode) {
     return "Execution Fragments";
 }
 
-ExecutionFragmentInterface.prototype.importXML = function (xml) {
-    return BpmnModeler.prototype.importXML.call(this, xml);
-}
-
 ExecutionFragmentInterface.prototype.setMediator = function (mediator) {
     this._mediator = mediator;
 }

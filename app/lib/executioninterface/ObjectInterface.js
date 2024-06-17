@@ -1,5 +1,3 @@
-import { ExecutionState } from "../../../executionEngine/types/ExecutionState";
-
 export default class ExecutionObjectInterface {
 
     objects = [];
@@ -12,53 +10,56 @@ export default class ExecutionObjectInterface {
         this._mediator = mediator;
     }
 
+    /**
+     * Updates the object interface with the new execution state.
+     * 
+     * @param {ExecutionState} newExecutionState 
+     */
     update(newExecutionState) {
-        objects = newExecutionState.currentStateInstances
-        references = newExecutionState.instanceLinks
-
+        const objects = newExecutionState.currentStateInstances
+        const references = newExecutionState.instanceLinks
         const objectsWithReferences = objects.map((object) => {
-            const objectReferences = references.filter((reference) => reference.first === object.instance.id)
+            const objectReferences = references.filter((reference) => reference.first.id === object.instance.id)
                 .reduce((groupedReferences, reference) => {
-                    const classOfOtherObject = reference.second.instance.className.id
+                    const classOfOtherObject = reference.second.dataclass.name
                     if (!groupedReferences[classOfOtherObject]) {
                         groupedReferences[classOfOtherObject] = []
                     }
                     groupedReferences[classOfOtherObject].push(reference)
                     return groupedReferences
                 }, {})
-
             return {
                 id: object.instance.id,
                 name: object.instance.name,
-                className: object.instance.className.name,
+                dataclass: object.instance.dataclass.name,
                 state: object.state,
                 ...objectReferences
             }
         })
         
         const objectsGroupedByClass = objectsWithReferences.reduce((groupedObjects, object) => {
-            if (!groupedObjects[object.className]) {
-                groupedObjects[object.className] = []
+            if (!groupedObjects[object.dataclass]) {
+                groupedObjects[object.dataclass] = []
             }
-            groupedObjects[object.className].push(object)
+            groupedObjects[object.dataclass].push(object)
             return groupedObjects
         }, {})
 
-        document.getElementById(this._container).innerHTML = Object.keys(objectsGroupedByClass).map((className) => {
+        document.getElementById(this._container).innerHTML = Object.keys(objectsGroupedByClass).map((dataclass) => {
             return `<div class="object-class">
-                <h2>${className}</h2>
+                <h2>Class: ${dataclass}</h2>
                 <div class="objects">
-                    ${objectsGroupedByClass[className].map((object) => {
+                    ${objectsGroupedByClass[dataclass].map((object) => {
                         return `<div class="object">
-                            <h3>${object.name}</h3>
-                            <p>${object.state}</p>
+                            <h3>Name: ${object.name}</h3>
+                            <p>State: ${object.state}</p>
                             <div class="references
-                                ${Object.keys(object).filter((key) => key !== "id" && key !== "name" && key !== "className" && key !== "state").map((key) => {
+                                ${Object.keys(object).filter((key) => key !== "id" && key !== "name" && key !== "dataclass" && key !== "state").map((key) => {
                                     return `<div class="reference">
-                                        <h4>${key}</h4>
+                                        <h4>References to class: ${key}</h4>
                                         <ul>
                                             ${object[key].map((reference) => {
-                                                return `<li>${reference.second.instance.name}</li>`
+                                                return `<li>${reference.second.name}</li>`
                                             }).join("")}
                                         </ul>
                                     </div>`
