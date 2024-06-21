@@ -8,7 +8,7 @@ import { DataObjectInstance } from "../dist/executionEngine/types/objects/DataOb
 import { DataObjectInstanceWithState } from "../dist/executionEngine/types/objects/DataObjectInstanceWithState";
 import { DataObjectInstanceLink } from "../dist/executionEngine/types/objects/DataObjectInstanceLink";
 import { DataObjectReference } from "../dist/executionEngine/types/fragments/DataObjectReference";
-import { cartesianProduct } from "../dist/util/Util";
+import { getAllSubsets } from "../dist/util/Util";
 
 /**
  * Based on the Data (Class) modeler, the Fragment Modeler and the Data (Object) Modeler,
@@ -94,81 +94,110 @@ export class ModelObjectParser {
         return new ExecutionState(dataObjectInstancesWithState, dataObjectInstanceLinks);
     }
 
-    /**
-     * Uses the modeled activity to extract input sets.
-     * Thereby, a data object of a certain class can be referenced in different states.
-     * That's why the function first extracts all references grouped by the class and
-     * then constructs cartesian products in order to retrieve the "actual" input sets.
-     */
-    _parseInputSets(modelActivity) {
-        const objectReferencesGroupedByClass = modelActivity
-            .get("dataInputAssociations")
-            .map(dataInputAssociationToClass => {
-                const rootElementForAssociationsOfClass = dataInputAssociationToClass.get("sourceRef")[0];
-                const objectReferencesOfClass = [];
-                // For each data object class, there might be multiple states that can be part of an input set.
-                for (let stateIndex = 0; stateIndex < rootElementForAssociationsOfClass.states.length; stateIndex++) {
-                    objectReferencesOfClass.push(new DataObjectReference(
-                        this.dataObjectClasses.find(dataclass =>
-                            dataclass.id === rootElementForAssociationsOfClass.dataclass.id
-                        ),
-                        rootElementForAssociationsOfClass.states[stateIndex].name,
-                        // List input associations currently not supported
-                        false
-                    ));
-                }
-                return objectReferencesOfClass;
-            });
-
-        return objectReferencesGroupedByClass.length > 0
-            // Construct all combinations in order to retrieve "actual" meaningful input sets,
-            // so sets actually containing objects of different classes.
-            ? cartesianProduct(...objectReferencesGroupedByClass)
-            // Only one "actual" input set which describes an empty one (no classes involved)
-            : [[]];
-    };
-
-    /**
-     * Uses the modeled activity to extract a distinct output set.
-     * Note that currently, there is only one distinct output set possible, because the function assumes,
-     * that a data object of a certain class can only be referenced in a single, distinct state in an output set.
-     * TODO: check why this is the case and why they decided not to apply the same concept as with input sets above.
-     */
-    _parseOutputSet(modelActivity) {
-        return modelActivity
-            .get("dataOutputAssociations")
-            .map(dataOutputAssociation => new DataObjectReference(
+    _parseDataAssociationElement(dataAssociationElement) {
+        const objectReferences = [];
+        // For each association, there might be multiple states encoded.
+        // These are modeled by the "|" symbol (e.g. [A | B]).
+        for (let stateIndex = 0; stateIndex < dataAssociationElement.states.length; stateIndex++) {
+            objectReferences.push(new DataObjectReference(
                 this.dataObjectClasses.find(dataclass =>
-                    dataclass.id === dataOutputAssociation.get("targetRef").dataclass.id
+                    dataclass.id === dataAssociationElement.dataclass.id
                 ),
-                // Currently, hardcodes the output state to the first one of this class.
-                // There might be multiple states, but that is currently not supported.
-                dataOutputAssociation.get("targetRef").states[0].name,
-                // List output associations currently not supported
+                dataAssociationElement.states[stateIndex].name,
+                // Multi-Instance (list) association currently not supported
                 false
             ));
+        }
+        return objectReferences;
+    }
+
+    _generateAllPossibleIOSets(objectReferencesForIOSet) {
+        if (objectReferencesForIOSet.length === 0) {
+            // No associations were specified, so there is only one "actual" IO set,
+            // which describes an empty one (no classes involved)
+            return [[]];
+        }
+
+        // Otherwise, in theory, all possible subsets of object references could be a valid IO set.
+        // Note that here, we need to filter out the empty subset as we definitively have data input/output.
+        return getAllSubsets(objectReferencesForIOSet).filter(subset => subset.length > 0);
     }
 
     /**
-     * Parses modeled activities as well as input sets and the output set.
+     * Uses the modeled activity to extract all possible input sets.
+     *
+     * Currently, as the framework does not support any form of IOSet modeling,
+     * we assume that all possible subsets of the modeled input associations
+     * could be a valid input set specification!
+     *
+     * Also note that currently, no evaluation takes place, whether an input
+     * association models a Multi-Instance-Object!
+     */
+    _parseAllPossibleInputSets(modelActivity) {
+        const objectInputReferences = modelActivity
+            .get("dataInputAssociations")
+            .flatMap(dataInputAssociation => {
+                const associationElement = dataInputAssociation.get("sourceRef")[0];
+                return this._parseDataAssociationElement(associationElement);
+            });
+
+        return this._generateAllPossibleIOSets(objectInputReferences);
+    };
+
+    /**
+     * Uses the modeled activity to extract all possible output sets.
+     *
+     * Currently, as the framework does not support any form of IOSet modeling,
+     * we assume that all possible subsets of the modeled output associations
+     * could be a valid output set specification!
+     *
+     * Also note that currently, no evaluation takes place, whether an output
+     * association models a Multi-Instance-Object!
+     */
+    _parseAllPossibleOutputSets(modelActivity) {
+        const objectOutputReferences = modelActivity
+            .get("dataOutputAssociations")
+            .flatMap(dataOutputAssociation => {
+                const associationElement = dataOutputAssociation.get("targetRef");
+                return this._parseDataAssociationElement(associationElement);
+            });
+
+        return this._generateAllPossibleIOSets(objectOutputReferences);
+    }
+
+    /**
+     * Parses modeled activities as well as all possible input and outputs sets.
+     *
+     * Note that because of multiple input and output sets, the parsing results in multiple
+     * instances of the same activity, each with a different input/output set.
      */
     parseActivities(fragmentModeler) {
-        // Get modelled activities
         const modelActivities = fragmentModeler._definitions
             .get("rootElements")[0]
             .get("flowElements")
             .filter(element => is(element, "bpmn:Task"))
 
-        // For each modeled activity and each input set, create a new Activity instance.
+        // Convert all activities in the model to respective instances understood by the engine.
         return modelActivities.flatMap(modelActivity => {
-            const inputSets = this._parseInputSets(modelActivity);
-            const outputSet = this._parseOutputSet(modelActivity);
-            return inputSets.map(inputSet => new Activity(
-                modelActivity.name, // TODO: better activity id
-                modelActivity.name,
-                new IOSet([].concat(inputSet)),
-                new IOSet(outputSet)
-            ));
+            const result = [];
+            const inputSets = this._parseAllPossibleInputSets(modelActivity);
+            const outputSets = this._parseAllPossibleOutputSets(modelActivity);
+
+            for (let i = 0; i < inputSets.length; i++) {
+                const inputSet = inputSets[i];
+                for (let o = 0; o < outputSets.length; o++) {
+                    const outputSet = outputSets[o];
+                    result.push(new Activity(
+                        // Unique id: (activity name, input set, output set)
+                        `${modelActivity.name}_i${i}_o${o}`,
+                        modelActivity.name,
+                        new IOSet(inputSet),
+                        new IOSet(outputSet)
+                    ));
+                }
+            }
+
+            return result;
         });
     }
 }
