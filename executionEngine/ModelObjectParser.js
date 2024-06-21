@@ -1,5 +1,4 @@
 import { is } from "bpmn-js/lib/util/ModelUtil";
-import { ExecutionEngine } from "../dist/executionEngine/ExecutionEngine";
 import { ExecutionState } from "../dist/executionEngine/types/ExecutionState";
 import { Activity } from "../dist/executionEngine/types/fragments/Activity";
 import { IOSet } from "../dist/executionEngine/types/fragments/IOSet";
@@ -21,17 +20,6 @@ export class ModelObjectParser {
         this.activities = this.parseActivities(fragmentModeler);
         this.dataObjectInstances = this.parseDataObjectInstances(objectModeler);
         this.currentState = this.parseCurrentState(objectModeler);
-    }
-
-    /**
-     * Returns the Execution Engine (lazy initializes it if needed).
-     */
-    getExecutionEngine() {
-        if (!this.executionEngine) {
-            // Lazy init
-            this.executionEngine = new ExecutionEngine(this.currentState, this.activities);
-        }
-        return this.executionEngine;
     }
 
     /**
