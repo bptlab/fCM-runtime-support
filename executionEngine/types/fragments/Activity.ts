@@ -14,12 +14,14 @@ export class Activity {
     name: string;
     inputSet: IOSet;
     outputSet: IOSet;
+    predecessors: string[];
 
-    public constructor(id: string, name: string, inputSet: IOSet, outputSet: IOSet) {
+    public constructor(id: string, name: string, inputSet: IOSet, outputSet: IOSet, predecessors: string[]) {
         this.id = id;
         this.name = name;
         this.inputSet = inputSet;
         this.outputSet = outputSet;
+        this.predecessors = predecessors;
     }
 
     /**
@@ -41,12 +43,69 @@ export class Activity {
     }
 
     /**
+     * Returns whether this activity is enabled in a given {@link ExecutionState},
+     * also considering the respective execution history for control-flow analysis.
+     */
+    public isEnabled(executionState: ExecutionState, executionHistory: Action[]): boolean {
+        return this.isControlFlowEnabled(executionState, executionHistory) && this.isDataFlowEnabled(executionState);
+    }
+
+    /**
      * Returns whether this activity is data-flow-enabled in a given {@link ExecutionState}.
      * In other words, is there a combination of objects that enables the activity?
+     *
+     * Obviously, if the activity needs to input, it is always data-flow-enabled.
      */
-    public isDataFlowEnabled(executionState: ExecutionState): boolean {
+    private isDataFlowEnabled(executionState: ExecutionState): boolean {
+        if (this.needsNoInput()) {
+            return true;
+        }
         const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
         return possibleInputCombinations && possibleInputCombinations.length > 0;
+    }
+
+    /**
+     * Returns whether this activity is control-flow-enabled in a given {@link ExecutionState},
+     * by also considering the respective execution history.
+     *
+     * Obviously, if the activity has no predecessors, it is always control-flow-enabled.
+     */
+    private isControlFlowEnabled(executionState: ExecutionState, executionHistory: Action[]): boolean {
+        if (this.predecessors.length === 0) {
+            return true;
+        }
+
+        const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
+
+        // For every needed predecessor, check if there is a suitable action for it in the history.
+        for (const predecessor of this.predecessors) {
+            const predicateForHistoricAction = (historicAction: Action) => {
+                const describesPredecessor = historicAction.activity.name === predecessor;
+
+                // There needs to be an intersection between the output list of the historic action
+                // and at least one input combination of the current activity.
+                let hasIODataOverlap = false;
+                for (const inputCombination of possibleInputCombinations) {
+                    // Note that the intersection check needs to be made on the (primitive) id level, as JS/TS are reference-based.
+                    const idsInHistoricOutput = historicAction.outputList.map(stateInstance => stateInstance.instance.id);
+                    const idsInInput = inputCombination.map(stateInstance => stateInstance.instance.id);
+                    const intersection = idsInHistoricOutput.filter(id => idsInInput.includes(id));
+                    if (intersection.length >= 1) {
+                        // overlap of at least one object
+                        hasIODataOverlap = true;
+                        break;
+                    }
+                }
+                return describesPredecessor && hasIODataOverlap;
+            }
+
+            if (!executionHistory.find(predicateForHistoricAction)) {
+                // There is no suitable execution of (at least one) predecessor in the history,
+                // which means the activity can't be control-flow-enabled.
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

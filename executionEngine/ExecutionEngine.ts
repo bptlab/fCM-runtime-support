@@ -26,11 +26,10 @@ export class ExecutionEngine {
 
     /**
      * Returns the ids of currently enabled activities.
-     * Note the current constraint on data-flow-enablement!
      */
     getEnabledActivities(): string[] {
         return this.activities
-            .filter(activity => activity.isDataFlowEnabled(this.currentState))
+            .filter(activity =>  activity.isEnabled(this.currentState, this.executionHistory))
             .map(enabledActivity => enabledActivity.id);
     }
 

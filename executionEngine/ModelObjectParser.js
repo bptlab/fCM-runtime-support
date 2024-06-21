@@ -166,6 +166,37 @@ export class ModelObjectParser {
     }
 
     /**
+     * Parses the simplest form of control flow (direct flows between activities).
+     */
+    _parseSequenceFlowsBetweenActivities(fragmentModeler) {
+        return fragmentModeler._definitions
+            .get("rootElements")[0]
+            .get("flowElements")
+            .filter(element => {
+                const isSequenceFlow = is(element, "bpmn:SequenceFlow");
+                if (!isSequenceFlow) {
+                    return false;
+                }
+                // Check if both ends belong to activities
+                return is(element.sourceRef, "bpmn:Task") && is(element.targetRef, "bpmn:Task");
+            })
+    }
+
+    /**
+     * Given a modeled activity and the parsed sequence flows between activities,
+     * try to find the predecessors (their names) for the given activity.
+     * Returns an empty array if no predecessors are needed.
+     *
+     * Note that by only considering the direct sequence flows between activities,
+     * the implementation might miss some predecessors (e.g. through gateways).
+     */
+    _findPredecessorActivities(modelActivity, sequenceFlowsBetweenActivities) {
+        return sequenceFlowsBetweenActivities
+            .filter(sequenceFlow => sequenceFlow.targetRef.name === modelActivity.name)
+            .map(sequenceFlow => sequenceFlow.sourceRef.name);
+    }
+
+    /**
      * Parses modeled activities as well as all possible input and outputs sets.
      *
      * Note that because of multiple input and output sets, the parsing results in multiple
@@ -175,13 +206,16 @@ export class ModelObjectParser {
         const modelActivities = fragmentModeler._definitions
             .get("rootElements")[0]
             .get("flowElements")
-            .filter(element => is(element, "bpmn:Task"))
+            .filter(element => is(element, "bpmn:Task"));
+
+        const sequenceFlowsBetweenActivities = this._parseSequenceFlowsBetweenActivities(fragmentModeler);
 
         // Convert all activities in the model to respective instances understood by the engine.
         return modelActivities.flatMap(modelActivity => {
             const result = [];
             const inputSets = this._parseAllPossibleInputSets(modelActivity);
             const outputSets = this._parseAllPossibleOutputSets(modelActivity);
+            const predecessors = this._findPredecessorActivities(modelActivity, sequenceFlowsBetweenActivities);
 
             for (let i = 0; i < inputSets.length; i++) {
                 const inputSet = inputSets[i];
@@ -192,7 +226,9 @@ export class ModelObjectParser {
                         `${modelActivity.name}_i${i}_o${o}`,
                         modelActivity.name,
                         new IOSet(inputSet),
-                        new IOSet(outputSet)
+                        new IOSet(outputSet),
+                        // Used for control-flow-analysis
+                        predecessors
                     ));
                 }
             }
