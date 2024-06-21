@@ -10,11 +10,13 @@ import { cartesianProduct } from "../../../util/Util";
  * Represents an activity that was modeled in the Fragment Modeler.
  */
 export class Activity {
+    id: string;
     name: string;
     inputSet: IOSet;
     outputSet: IOSet;
 
-    public constructor(name: string, inputSet: IOSet, outputSet: IOSet) {
+    public constructor(id: string, name: string, inputSet: IOSet, outputSet: IOSet) {
+        this.id = id;
         this.name = name;
         this.inputSet = inputSet;
         this.outputSet = outputSet;
@@ -39,10 +41,10 @@ export class Activity {
     }
 
     /**
-     * Returns whether this activity is enabled in a given {@link ExecutionState}.
+     * Returns whether this activity is data-flow-enabled in a given {@link ExecutionState}.
      * In other words, is there a combination of objects that enables the activity?
      */
-    public isEnabled(executionState: ExecutionState): boolean {
+    public isDataFlowEnabled(executionState: ExecutionState): boolean {
         const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
         return possibleInputCombinations && possibleInputCombinations.length > 0;
     }
@@ -75,6 +77,7 @@ export class Activity {
     /**
      * Based on an input list of {@link DataObjectInstanceWithState} elements and a concrete {@link ExecutionState},
      * returns the output objects that are affected by executing the activity with the given input objects.
+     * Thereby, if no input element can be found for an element in the output set, a new one is created.
      */
     private getOutputForInput(inputList: DataObjectInstanceWithState[], executionState: ExecutionState): DataObjectInstanceWithState[] {
         return this.outputSet.set.map(output => {
@@ -82,8 +85,10 @@ export class Activity {
                 stateInstance.instance.dataclass === output.dataclass
             );
             if (stateInstance) {
+                // Use found element in the input list
                 return new DataObjectInstanceWithState(stateInstance.instance, output.state);
             } else {
+                // Create a new object that was created by the executing the activity.
                 const newInstance: DataObjectInstance = executionState.getNewInstanceOfClass(output.dataclass);
                 return new DataObjectInstanceWithState(newInstance, output.state);
             }

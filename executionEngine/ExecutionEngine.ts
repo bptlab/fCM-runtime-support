@@ -20,31 +20,32 @@ export class ExecutionEngine {
         this.mediator = mediator;
     }
 
-    private findActivityWithName(activityName: string): Activity | undefined {
-        return this.activities.find(activity => activity.name === activityName);
+    private findActivityWithId(activityId: string): Activity | undefined {
+        return this.activities.find(activity => activity.id === activityId);
     }
 
     /**
-     * Returns the names of currently enabled activities.
+     * Returns the ids of currently enabled activities.
+     * Note the current constraint on data-flow-enablement!
      */
     getEnabledActivities(): string[] {
         return this.activities
-            .filter(activity => activity.isEnabled(this.currentState))
-            .map(enabledActivity => enabledActivity.name);
+            .filter(activity => activity.isDataFlowEnabled(this.currentState))
+            .map(enabledActivity => enabledActivity.id);
     }
 
     /**
      * Returns groups of related objects that can be used for executing the given activity.
      */
-    getRelatedObjectGroupsForActivity(activityName: string): string[][] {
-        const activityToExecute = this.findActivityWithName(activityName);
+    getRelatedObjectGroupsForActivity(activityId: string): string[][] {
+        const activityToExecute = this.findActivityWithId(activityId);
         if (!activityToExecute) {
             // unknown activity
             return [];
         }
 
         // Aggregate all groups of objects that can be used for executing the activity.
-        // For now, just use the name of the objects involved.
+        // For now, just use the id of the objects involved.
         const relatedObjectGroupsForActivity: string[][] = [];
         const inputCombinations: DataObjectInstanceWithState[][] = activityToExecute.getPossibleInputCombinations(this.currentState);
         for (const inputCombination of inputCombinations) {
@@ -52,7 +53,7 @@ export class ExecutionEngine {
             const objectGroup: string[] = [];
             for (const inputObject of inputCombination) {
                 // The object itself is usable for executing the activity.
-                objectGroup.push(inputObject.instance.name);
+                objectGroup.push(inputObject.instance.id);
                 // TODO: also retrieve objects that related to the input objects (see sketch of popover idea)?
             }
             relatedObjectGroupsForActivity.push(objectGroup);
@@ -70,7 +71,7 @@ export class ExecutionEngine {
             // whose input requirements are met by the selection.
             let actionMatches = true;
             for (const actionInputElement of action.inputList) {
-                if (!objectGroup.includes(actionInputElement.instance.name)) {
+                if (!objectGroup.includes(actionInputElement.instance.id)) {
                     // At least one input requirement is not met
                     actionMatches = false;
                     break;
@@ -84,8 +85,8 @@ export class ExecutionEngine {
      * Execute the given activity with the selected group of related objects.
      *
      */
-    executeActivityWithRelatedObjectGroup(activityName: string, objectGroup: string[]): void {
-        const activityToExecute = this.findActivityWithName(activityName);
+    executeActivityWithRelatedObjectGroup(activityId: string, objectGroup: string[]): void {
+        const activityToExecute = this.findActivityWithId(activityId);
         if (!activityToExecute) {
             // unknown activity
             return;
