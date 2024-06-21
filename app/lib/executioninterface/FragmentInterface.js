@@ -1,12 +1,11 @@
 import inherits from 'inherits';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
-import fragmentPaletteModule from '../fragmentmodeler/palette';
-import customModelingModule from '../fragmentmodeler/modeling';
 import bpmnExtension from '../fragmentmodeler/moddle/bpmnextension.json';
 import {is} from 'bpmn-js/lib/util/ModelUtil';
 import {without} from 'min-dash';
-import taskLabelHandling from "../fragmentmodeler/taskLabelHandling";
-import taskRenderer from "../fragmentmodeler/draw";
+import taskRenderer from "../fragmentmodeler/draw"
+import inputOutputSetPopover from "./modules/InputOutputSetPopover";
+import enabledActivityColor from "./modules/EnabledActivityColor";
 
 import {assign } from 'min-dash';
 
@@ -14,8 +13,10 @@ export default function ExecutionFragmentInterface(options) {
     const customModules = [
         //fragmentPaletteModule,
         //customModelingModule,
-        //taskRenderer,
+        enabledActivityColor,
+        taskRenderer,
         //taskLabelHandling,
+        inputOutputSetPopover,
         {
             executionFragmentInterface: ['value', this]
         },
@@ -55,6 +56,22 @@ ExecutionFragmentInterface.prototype.name = function (constructionMode) {
 ExecutionFragmentInterface.prototype.setMediator = function (mediator) {
     this._mediator = mediator;
 }
+
+
+ExecutionFragmentInterface.prototype.executeStep = function(task, input, output) {
+    console.log("Executing step");
+    // this._mediator.executeStep(task, input, output);
+    this.get('elementRegistry').filter((element) => is(element, 'bpmn:Task')).forEach((element) => {
+        console.log(element)
+        // get allowed inputs and outputs from semantic
+        // get enablement from mediator
+        // update attributes
+        this.get('eventBus').fire('element.changed', { element: element});
+    })
+}
+
+
+// ------------------ Event Handling ------------------
 ExecutionFragmentInterface.prototype.handleOlcListChanged = function (olcs, dryRun = false) {
     this._olcs = olcs;
 }
