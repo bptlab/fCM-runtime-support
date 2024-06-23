@@ -82,14 +82,17 @@ export class Activity {
         const canPredecessorBeFoundInHistory = (predecessor: string): boolean => {
             const predicateForHistoricAction = (historicAction: Action): boolean => {
                 const describesPredecessor = historicAction.activity.name === predecessor;
-                // There needs to be an intersection between the output list of the historic action
+                // There needs to be an intersection between the input or output list of the historic action
                 // and at least one input combination of the current activity.
                 let hasIODataOverlap = false;
                 for (const inputCombination of possibleInputCombinations) {
                     // Note that the intersection check needs to be made on the (primitive) id level, as JS/TS are reference-based.
+                    const idsInHistoricInput = historicAction.inputList.map(stateInstance => stateInstance.instance.id);
                     const idsInHistoricOutput = historicAction.outputList.map(stateInstance => stateInstance.instance.id);
-                    const idsInInput = inputCombination.map(stateInstance => stateInstance.instance.id);
-                    const intersection = idsInHistoricOutput.filter(id => idsInInput.includes(id));
+                    // Combine input and output ids of historic action and de-duplicate them
+                    const idsOfHistoricAction = [...new Set([...idsInHistoricInput, ...idsInHistoricOutput])];
+                    const idsInCurrentInput = inputCombination.map(stateInstance => stateInstance.instance.id);
+                    const intersection = idsOfHistoricAction.filter(id => idsInCurrentInput.includes(id));
                     if (intersection.length >= 1) {
                         // overlap of at least one object
                         hasIODataOverlap = true;
