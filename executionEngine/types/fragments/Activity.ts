@@ -1,3 +1,4 @@
+import { ActivityPredecessorInformation } from "./ActivityPredecessorInformation";
 import { IOSet } from "./IOSet";
 import { DataObjectInstance} from "../objects/DataObjectInstance";
 import { DataObjectInstanceLink } from "../objects/DataObjectInstanceLink";
@@ -14,14 +15,14 @@ export class Activity {
     name: string;
     inputSet: IOSet;
     outputSet: IOSet;
-    predecessors: string[];
+    predecessorInformation: ActivityPredecessorInformation;
 
-    public constructor(id: string, name: string, inputSet: IOSet, outputSet: IOSet, predecessors: string[]) {
+    public constructor(id: string, name: string, inputSet: IOSet, outputSet: IOSet, predecessorInformation: ActivityPredecessorInformation) {
         this.id = id;
         this.name = name;
         this.inputSet = inputSet;
         this.outputSet = outputSet;
-        this.predecessors = predecessors;
+        this.predecessorInformation = predecessorInformation;
     }
 
     /**
@@ -71,17 +72,16 @@ export class Activity {
      * Obviously, if the activity has no predecessors, it is always control-flow-enabled.
      */
     private isControlFlowEnabled(executionState: ExecutionState, executionHistory: Action[]): boolean {
-        if (this.predecessors.length === 0) {
+        const { predecessors, hasParallelPredecessors } = this.predecessorInformation;
+        if (predecessors.length === 0) {
             return true;
         }
 
         const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
-
-        // For every needed predecessor, check if there is a suitable action for it in the history.
-        for (const predecessor of this.predecessors) {
-            const predicateForHistoricAction = (historicAction: Action) => {
+        // For a given predecessor, checks if there is a suitable action for it in the history.
+        const canPredecessorBeFoundInHistory = (predecessor: string): boolean => {
+            const predicateForHistoricAction = (historicAction: Action): boolean => {
                 const describesPredecessor = historicAction.activity.name === predecessor;
-
                 // There needs to be an intersection between the output list of the historic action
                 // and at least one input combination of the current activity.
                 let hasIODataOverlap = false;
@@ -98,14 +98,30 @@ export class Activity {
                 }
                 return describesPredecessor && hasIODataOverlap;
             }
+            return Boolean(executionHistory.find(predicateForHistoricAction));
+        }
 
-            if (!executionHistory.find(predicateForHistoricAction)) {
-                // There is no suitable execution of (at least one) predecessor in the history,
-                // which means the activity can't be control-flow-enabled.
-                return false;
+        // parallel
+        if (hasParallelPredecessors) {
+            for (const predecessor of predecessors) {
+                if (!canPredecessorBeFoundInHistory(predecessor)) {
+                    // At least one of the parallel predecessors was not found in the history
+                    return false;
+                }
+            }
+            // All the parallel predecessors were found in the history
+            return true;
+        }
+
+        // exclusive
+        for (const predecessor of predecessors) {
+            if (canPredecessorBeFoundInHistory(predecessor)) {
+                // At least one of the exclusive predecessors was found in the history
+                return true;
             }
         }
-        return true;
+        // None of the exclusive predecessors were found in the history
+        return false;
     }
 
     /**

@@ -1,6 +1,7 @@
 import { is } from "bpmn-js/lib/util/ModelUtil";
 import { ExecutionState } from "../dist/executionEngine/types/ExecutionState";
 import { Activity } from "../dist/executionEngine/types/fragments/Activity";
+import { ActivityPredecessorInformation } from "../dist/executionEngine/types/fragments/ActivityPredecessorInformation";
 import { IOSet } from "../dist/executionEngine/types/fragments/IOSet";
 import { DataObjectClass } from "../dist/executionEngine/types/objects/DataObjectClass";
 import { DataObjectInstance } from "../dist/executionEngine/types/objects/DataObjectInstance";
@@ -154,34 +155,58 @@ export class ModelObjectParser {
     }
 
     /**
-     * Parses the simplest form of control flow (direct flows between activities).
+     * Uses the fragment modeler to discover all possible predecessor activities to a given activity in the model.
+     * Therefore, paths ending in the activity are iteratively followed until they end (completely) or in another activity.
+     * Thereby, exclusive and parallel gateways are also evaluated accordingly.
      */
-    _parseSequenceFlowsBetweenActivities(fragmentModeler) {
-        return fragmentModeler._definitions
+    _discoverPredecessorActivities(fragmentModeler, modelActivity) {
+        const elementsInFragments = fragmentModeler._definitions
             .get("rootElements")[0]
-            .get("flowElements")
+            .get("flowElements");
+
+        // Find flows that end in the given activity
+        const flowsEndingInActivity = elementsInFragments
             .filter(element => {
                 const isSequenceFlow = is(element, "bpmn:SequenceFlow");
                 if (!isSequenceFlow) {
                     return false;
                 }
-                // Check if both ends belong to activities
-                return is(element.sourceRef, "bpmn:Task") && is(element.targetRef, "bpmn:Task");
-            })
-    }
+                return element.targetRef === modelActivity;
+            });
 
-    /**
-     * Given a modeled activity and the parsed sequence flows between activities,
-     * try to find the predecessors (their names) for the given activity.
-     * Returns an empty array if no predecessors are needed.
-     *
-     * Note that by only considering the direct sequence flows between activities,
-     * the implementation might miss some predecessors (e.g. through gateways).
-     */
-    _findPredecessorActivities(modelActivity, sequenceFlowsBetweenActivities) {
-        return sequenceFlowsBetweenActivities
-            .filter(sequenceFlow => sequenceFlow.targetRef.name === modelActivity.name)
-            .map(sequenceFlow => sequenceFlow.sourceRef.name);
+        // Iteratively try to find the predecessor activities on paths to the given activity.
+        // Per default, exclusive behavior is assumed if there are multiple activities in the result.
+        const predecessors = [];
+        let hasParallelPredecessors = false;
+
+        // Queue of path elements to check
+        let currentPathElementsToCheck = [...flowsEndingInActivity];
+        while (currentPathElementsToCheck.length > 0) {
+            // Pop first element in queue
+            const element = currentPathElementsToCheck.shift();
+            if (is(element, "bpmn:Task")) {
+                // We found a predecessor :)
+                predecessors.push(element.name);
+            } else if (is(element, "bpmn:SequenceFlow")) {
+                // Add source of sequence flow to the queue
+                currentPathElementsToCheck.push(element.sourceRef);
+            } else if (is(element, "bpmn:ExclusiveGateway") && element.incoming) {
+                // Add incoming flows of gateway to the queue (if there are any)
+                currentPathElementsToCheck = [...currentPathElementsToCheck, ...element.incoming];
+            } else if (is(element, "bpmn:ParallelGateway") && element.incoming) {
+                // Add incoming flows of gateway to the queue (if there are any)
+                currentPathElementsToCheck = [...currentPathElementsToCheck, ...element.incoming];
+                hasParallelPredecessors = true;
+            } else if (is(element, "bpmn:StartEvent")) {
+                // no further elements are available here
+            } else {
+                console.warn(
+            `bpmn element of type ${element.$type} currently not supported for predecessor discovery`
+                );
+            }
+        }
+
+        return { predecessors, hasParallelPredecessors };
     }
 
     /**
@@ -196,14 +221,12 @@ export class ModelObjectParser {
             .get("flowElements")
             .filter(element => is(element, "bpmn:Task"));
 
-        const sequenceFlowsBetweenActivities = this._parseSequenceFlowsBetweenActivities(fragmentModeler);
-
         // Convert all activities in the model to respective instances understood by the engine.
         return modelActivities.flatMap(modelActivity => {
             const result = [];
             const inputSets = this._parseAllPossibleInputSets(modelActivity);
             const outputSets = this._parseAllPossibleOutputSets(modelActivity);
-            const predecessors = this._findPredecessorActivities(modelActivity, sequenceFlowsBetweenActivities);
+            const predecessorInformation = this._discoverPredecessorActivities(fragmentModeler, modelActivity);
 
             for (let i = 0; i < inputSets.length; i++) {
                 const inputSet = inputSets[i];
@@ -216,7 +239,10 @@ export class ModelObjectParser {
                         new IOSet(inputSet),
                         new IOSet(outputSet),
                         // Used for control-flow-analysis
-                        predecessors
+                        new ActivityPredecessorInformation(
+                            predecessorInformation.predecessors,
+                            predecessorInformation.hasParallelPredecessors
+                        )
                     ));
                 }
             }
