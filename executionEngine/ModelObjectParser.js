@@ -233,8 +233,8 @@ export class ModelObjectParser {
                 for (let o = 0; o < outputSets.length; o++) {
                     const outputSet = outputSets[o];
                     result.push(new Activity(
-                        // Unique id: (activity name, input set, output set)
-                        `${modelActivity.name}_i${i}_o${o}`,
+                        // Unique id: (activity id in moddle, input set, output set)
+                        `${modelActivity.id}###i${i}###o${o}`,
                         modelActivity.name,
                         new IOSet(inputSet),
                         new IOSet(outputSet),

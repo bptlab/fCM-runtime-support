@@ -25,12 +25,11 @@ export class ExecutionEngine {
     }
 
     /**
-     * Returns the ids of currently enabled activities.
+     * Returns currently enabled activities.
      */
-    getEnabledActivities(): string[] {
+    getEnabledActivities(): Activity[] {
         return this.activities
-            .filter(activity =>  activity.isEnabled(this.currentState, this.executionHistory))
-            .map(enabledActivity => enabledActivity.id);
+            .filter(activity =>  activity.isEnabled(this.currentState, this.executionHistory));
     }
 
     /**
