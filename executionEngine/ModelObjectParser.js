@@ -8,7 +8,7 @@ import { DataObjectInstance } from "../dist/executionEngine/types/objects/DataOb
 import { DataObjectInstanceWithState } from "../dist/executionEngine/types/objects/DataObjectInstanceWithState";
 import { DataObjectInstanceLink } from "../dist/executionEngine/types/objects/DataObjectInstanceLink";
 import { DataObjectReference } from "../dist/executionEngine/types/fragments/DataObjectReference";
-import { getAllSubsets } from "../dist/util/Util";
+import { extendedCartesianProduct } from "../dist/util/Util";
 
 /**
  * Based on the Data (Class) modeler, the Fragment Modeler and the Data (Object) Modeler,
@@ -83,6 +83,11 @@ export class ModelObjectParser {
         return new ExecutionState(dataObjectInstancesWithState, dataObjectInstanceLinks);
     }
 
+    /**
+     * Parses a data-association element of the model into respective {@link DataObjectReference} objects.
+     *
+     * Note that currently, no evaluation takes place, whether an association models a Multi-Instance-Object!
+     */
     _parseDataAssociationElement(dataAssociationElement) {
         const objectReferences = [];
         // For each association, there might be multiple states encoded.
@@ -100,6 +105,10 @@ export class ModelObjectParser {
         return objectReferences;
     }
 
+    /**
+     * Generates all possible IO Sets by firstly merging references by their classes,
+     * and based on that, building combinations by computing the cartesian product.
+     */
     _generateAllPossibleIOSets(objectReferencesForIOSet) {
         if (objectReferencesForIOSet.length === 0) {
             // No associations were specified, so there is only one "actual" IO set,
@@ -107,20 +116,20 @@ export class ModelObjectParser {
             return [[]];
         }
 
-        // Otherwise, in theory, all possible subsets of object references could be a valid IO set.
-        // Note that here, we need to filter out the empty subset as we definitively have data input/output.
-        return getAllSubsets(objectReferencesForIOSet).filter(subset => subset.length > 0);
+        // Merge all references with the same class
+        const referencesMergedByClasses = {};
+        for (const inputReference of objectReferencesForIOSet) {
+            const referencesForClass = referencesMergedByClasses[inputReference.dataclass.id] || [];
+            referencesForClass.push(inputReference);
+            referencesMergedByClasses[inputReference.dataclass.id] = referencesForClass;
+        }
+
+        // Then build the cartesian product between the individual class groups
+        return extendedCartesianProduct(Object.values(referencesMergedByClasses));
     }
 
     /**
      * Uses the modeled activity to extract all possible input sets.
-     *
-     * Currently, as the framework does not support any form of IOSet modeling,
-     * we assume that all possible subsets of the modeled input associations
-     * could be a valid input set specification!
-     *
-     * Also note that currently, no evaluation takes place, whether an input
-     * association models a Multi-Instance-Object!
      */
     _parseAllPossibleInputSets(modelActivity) {
         const objectInputReferences = modelActivity
@@ -135,13 +144,6 @@ export class ModelObjectParser {
 
     /**
      * Uses the modeled activity to extract all possible output sets.
-     *
-     * Currently, as the framework does not support any form of IOSet modeling,
-     * we assume that all possible subsets of the modeled output associations
-     * could be a valid output set specification!
-     *
-     * Also note that currently, no evaluation takes place, whether an output
-     * association models a Multi-Instance-Object!
      */
     _parseAllPossibleOutputSets(modelActivity) {
         const objectOutputReferences = modelActivity
