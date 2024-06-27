@@ -5,7 +5,7 @@ import { DataObjectInstanceLink } from "../objects/DataObjectInstanceLink";
 import { DataObjectInstanceWithState } from "../objects/DataObjectInstanceWithState";
 import { Action } from "../Action";
 import { ExecutionState } from "../ExecutionState";
-import { cartesianProduct } from "../../../util/Util";
+import { extendedCartesianProduct } from "../../../util/Util";
 
 /**
  * Represents an activity that was modeled in the Fragment Modeler.
@@ -139,7 +139,7 @@ export class Activity {
             );
             possibleStateInstances.push(matchingStateInstances);
         }
-        return cartesianProduct(...possibleStateInstances);
+        return extendedCartesianProduct(possibleStateInstances);
     }
 
     /**
