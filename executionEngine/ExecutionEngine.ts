@@ -35,7 +35,7 @@ export class ExecutionEngine {
     /**
      * Returns groups of related objects that can be used for executing the given activity.
      */
-    getRelatedObjectGroupsForActivity(activityId: string): string[][] {
+    getRelatedObjectGroupsForActivity(activityId: string): DataObjectInstanceWithState[][] {
         const activityToExecute = this.findActivityWithId(activityId);
         if (!activityToExecute) {
             // unknown activity
@@ -43,15 +43,14 @@ export class ExecutionEngine {
         }
 
         // Aggregate all groups of objects that can be used for executing the activity.
-        // For now, just use the id of the objects involved.
-        const relatedObjectGroupsForActivity: string[][] = [];
+        const relatedObjectGroupsForActivity: DataObjectInstanceWithState[][] = [];
         const inputCombinations: DataObjectInstanceWithState[][] = activityToExecute.getPossibleInputCombinations(this.currentState);
         for (const inputCombination of inputCombinations) {
             // For each possible input combination start a new object group in the output.
-            const objectGroup: string[] = [];
+            const objectGroup: DataObjectInstanceWithState[] = [];
             for (const inputObject of inputCombination) {
                 // The object itself is usable for executing the activity.
-                objectGroup.push(inputObject.instance.id);
+                objectGroup.push(inputObject);
                 // TODO: also retrieve objects that related to the input objects (see sketch of popover idea)?
             }
             relatedObjectGroupsForActivity.push(objectGroup);
