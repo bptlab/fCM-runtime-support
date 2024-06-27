@@ -44,8 +44,14 @@ export class Action {
      * Computes the changed {@link ExecutionState} for the execution.
      */
     private computeStateChanges(executionState: ExecutionState): ExecutionState {
-        const changedExecutionDataObjectInstances = this.getChangedExecutionDataObjectInstances();
+        const changedStateInstances = this.getChangedExecutionDataObjectInstances();
+        const unchangedStateInstances = executionState.currentStateInstances.filter(currentStateInstance =>
+            !changedStateInstances.some(changedStateInstance => changedStateInstance.instance === currentStateInstance.instance)
+        );
+        // Combine unchanged instances with output list of action, which contains changed ones with new state,
+        // as well as freshly created instances (no matching instance of the input could be re-used in that case).
+        const newStateInstances = [...unchangedStateInstances, ...this.outputList];
         const newInstanceLinks = executionState.instanceLinks.concat(this.addedInstanceLinks);
-        return new ExecutionState(changedExecutionDataObjectInstances, newInstanceLinks);
+        return new ExecutionState(newStateInstances, newInstanceLinks);
     }
 }
