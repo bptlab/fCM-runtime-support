@@ -49,6 +49,11 @@
           "name": "NoP",
           "isAttr": true,
           "type": "int"
+        },
+        {
+          "name": "isEnabled",
+          "isAttr": true,
+          "type": "boolean"
         }
       ]
     }

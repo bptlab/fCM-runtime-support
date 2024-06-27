@@ -57,17 +57,27 @@ ExecutionFragmentInterface.prototype.setMediator = function (mediator) {
     this._mediator = mediator;
 }
 
+ExecutionFragmentInterface.prototype.refresh = function () {
+  this._enabledActivity = this._mediator.getEnabledActivities();
+  const enabledActivityIds = this._enabledActivity.map(
+    (activity) => activity.id.split("###")[0]
+  );
+  this.get("elementRegistry")
+    .filter((element) => is(element, "bpmn:Task"))
+    .forEach((element) => {
+      element.businessObject.isEnabled = enabledActivityIds.includes(
+        element.id
+      ); 
 
-ExecutionFragmentInterface.prototype.executeStep = function(task, input, output) {
-    console.log("Executing step");
-    // this._mediator.executeStep(task, input, output);
-    this.get('elementRegistry').filter((element) => is(element, 'bpmn:Task')).forEach((element) => {
-        console.log(element)
-        // get allowed inputs and outputs from semantic
-        // get enablement from mediator
-        // update attributes
-        this.get('eventBus').fire('element.changed', { element: element});
-    })
+      this.get("eventBus").fire("element.changed", {
+        element,
+      });
+    });
+};
+
+ExecutionFragmentInterface.prototype.executeStep = function(activityWithInputOutput, objectData) {
+    this._mediator.executeStep(activityWithInputOutput.id, objectData);
+    this.refresh();
 }
 
 

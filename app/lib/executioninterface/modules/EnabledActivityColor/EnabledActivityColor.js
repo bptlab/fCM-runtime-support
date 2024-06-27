@@ -16,11 +16,10 @@ export default class EnabledActivityColor extends BaseRenderer {
     }
 
     drawShape(parentNode, element) {
-        console.log(element)
         const shape = this.bpmnRenderer.drawShape(parentNode, element);
         const semantic = getSemantic(element);
-        // only color enabled activities
-        attr(shape, 'fill', "#0000FF");
+        if (semantic.isEnabled)
+            attr(shape, 'fill', "#0096FF");
         return shape;
     }
 

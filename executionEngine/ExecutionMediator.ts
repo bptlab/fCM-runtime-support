@@ -20,25 +20,40 @@ export default class ExecutionMediator {
 
     constructor(fragmentInterface: ExecutionFragmentInterface, objectInterface: ExecutionObjectInterface, modelerData: ModelerData, modelObjectParser: ModelObjectParser) {
         this._parser = modelObjectParser;
+        const activities = this._parser.activities
+        const state = this._parser.currentState
+        const executionEngine = new ExecutionEngine(state, activities, this);
+        this._executor = executionEngine;
+        
         this._fragmentInterface = fragmentInterface;
         fragmentInterface.setMediator(this);
         modelerData.fragmentModelXML().then(async ({xml}) => {
             // @ts-ignore
             await fragmentInterface.importXML(xml)
+            fragmentInterface.refresh()
         }).catch((e) => {
             console.error(e)
         })
         
         this._objectInterface = objectInterface;
         objectInterface.setMediator(this);
-
-        const activities = this._parser.activities
-        const state = this._parser.currentState
-        const executionEngine = new ExecutionEngine(state, activities, this);
-        this._executor = executionEngine;
         this._objectInterface.update(state)
-        this._modelerData = modelerData
 
+        this._modelerData = modelerData
     }
+
+    getEnabledActivities() {
+        return this._executor.getEnabledActivities();
+    }
+
+    getRelatedObjectGroupsForActivity(activityId: string) {
+        return this._executor.getRelatedObjectGroupsForActivity(activityId);
+    }
+
+    executeStep(activityId: string, objectIds: string[]) {
+        this._executor.executeActivityWithRelatedObjectGroup(activityId, objectIds);
+    }
+
+
 
 }
