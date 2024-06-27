@@ -8,26 +8,34 @@ export default class InputOutputSetPopover extends CommandInterceptor {
     constructor(eventBus, modeling, overlays, executionFragmentInterface) {
         super(eventBus);
         this._eventBus = eventBus;
-        this._modeling = modeling;
+        //this._modeling = modeling;
+        
+        // Popover container for the dropdowns
         this._dropdownContainer = document.createElement('div');
         this._dropdownContainer.classList.add('dd-dropdown-multicontainer');
 
+        // Dropdown to select the input set (class based)
         this._inputDropdown = getDropdown("Input");
         this._dropdownContainer.appendChild(this._inputDropdown);
         this._selectedInput = undefined;
 
+        // Dropdown to select the output set (class based)
         this._outputDropdown = getDropdown("Output");
         this._dropdownContainer.appendChild(this._outputDropdown);
         this._selectedOutput = undefined;
 
+        // Dropdown to select the real objects for the input set
+        // Only available after input and output set have been selected
         this._objectDropdown = getDropdown("Object");
         this._dropdownContainer.appendChild(this._objectDropdown);
         this._selectedObject = undefined;
 
+        // Button to start the execution
         this._startButton = document.createElement("button");
         this._startButton.innerHTML = "Start";
         this._startButton.classList.add("startButton");
         this._dropdownContainer.appendChild(this._startButton);
+
         this._currentDropdownTarget = undefined;
         this._overlayId = undefined;
         this._overlays = overlays;
@@ -36,9 +44,10 @@ export default class InputOutputSetPopover extends CommandInterceptor {
         eventBus.on(['element.dblclick'], e => {
             const element = e.element || e.shape || e.elements[0];
             if (is(element, 'bpmn:Task')) {
+                // If the element is a task, show the popover
+                this._dropdownContainer.currentElement = element;
                 const activity = element.businessObject;
-
-                // This activity with input and output set
+                // All possible combinations of the activity, input and output sets
                 const activityWithInputOutput =
                     this._fragmentInterface._mediator
                     .getEnabledActivities()
@@ -46,16 +55,11 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                         (a) => a.id.split("###")[0] === activity.id &&
                         a.inputSet && a.outputSet
                     );
-                // Input set (class, not object level)
+                // All possible input sets (class, not object level)
                 const inputSets = activityWithInputOutput.map(
                     (a) => a.inputSet.set
                 );
-                // Output set (class, not object level)
-                const outputSets = activityWithInputOutput.map(
-                    (a) => a.outputSet.set
-                );
-                
-                
+                // Map between a string representation and the actual input set
                 const inputMap = new Map();
                 inputSets.forEach((inputSet) => {
                   const key = inputSet
@@ -65,44 +69,52 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                     inputMap.set(key, inputSet);
                   }
                 });
-
-                const outputMap = new Map();
-                outputSets.forEach((outputSet) => {
-                  const key = outputSet
-                    .map(
-                      (output) => `${output.dataclass.name} [${output.state}]`
-                    )
-                    .join(", ");
-                  if (!outputMap.has(key)) {
-                    outputMap.set(key, outputSet);
-                  }
-                });
-
-                this._dropdownContainer.currentElement = element;
-
+                // Show string representation in the dropdown
+                // Update object dropdown based on the selected input and output
                 const populateInputDropdown = () => {
                     this._inputDropdown.populate(
                         inputMap.keys(),
                         (input) => {
                             this._selectedInput = input;
+                            // Set the selected entry to the selected option
                             this._inputDropdown.getEntries().forEach(entry => entry.setSelected(input === entry.option));
                             populateObjectDropdown();
                         },
                         element
                     );
                 }
+
+                // Output set (class, not object level)
+                const outputSets = activityWithInputOutput.map(
+                    (a) => a.outputSet.set
+                );
+                // Map between a string representation and the actual output set
+                const outputMap = new Map();
+                outputSets.forEach((outputSet) => {
+                  const key = outputSet
+                    .map((output) => `${output.dataclass.name} [${output.state}]`)
+                    .join(", ");
+                  if (!outputMap.has(key)) {
+                    outputMap.set(key, outputSet);
+                  }
+                });
+                // Show string representation in the dropdown
+                // Update object dropdown based on the selected input and output
                 const populateOutputDropdown = () => {
                     this._outputDropdown.populate(
                         outputMap.keys(),
                         (output) => {
                             this._selectedOutput = output;
+                            // Set the selected entry to the selected option
                             this._outputDropdown.getEntries().forEach(entry => entry.setSelected(output === entry.option));
                             populateObjectDropdown();
                         },
                         element
                     );
                 }
-
+                
+                // Update object dropdown based on the selected input and output
+                // Options are only available after input and output set have been selected
                 const populateObjectDropdown = () => {
                     const selectedActivity = activityWithInputOutput.find(activity => activity.inputSet.set === inputMap.get(this._selectedInput) && activity.outputSet.set === outputMap.get(this._selectedOutput))
                     if(!selectedActivity) {
@@ -117,7 +129,9 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                 populateOutputDropdown();
                 populateObjectDropdown();
 
+                // Execute the step with the selected input and output set and object
                 this._startButton.addEventListener("click", (event) => {
+                    // TODO add object selection
                     this._fragmentInterface.executeStep(element, inputMap.get(this._selectedInput), outputMap.get(this._selectedOutput));
                     event.stopPropagation();
                 });

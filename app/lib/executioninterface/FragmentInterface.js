@@ -8,19 +8,20 @@ import inputOutputSetPopover from "./modules/InputOutputSetPopover";
 import enabledActivityColor from "./modules/EnabledActivityColor";
 
 import {assign } from 'min-dash';
+import { Activity } from '../../../dist/executionEngine/types/fragments/Activity';
 
 export default function ExecutionFragmentInterface(options) {
     const customModules = [
         //fragmentPaletteModule,
         //customModelingModule,
         enabledActivityColor,
-        taskRenderer,
+        // taskRenderer, TODO currently not possible because overwriting the renderer
         //taskLabelHandling,
         inputOutputSetPopover,
         {
             executionFragmentInterface: ['value', this]
         },
-        {
+        {// Disable editing of the diagram
             contextPad: ["value", {}],
             contextPadProvider: ["value", {}],
             palette: ["value", {}],
@@ -57,6 +58,9 @@ ExecutionFragmentInterface.prototype.setMediator = function (mediator) {
     this._mediator = mediator;
 }
 
+/**
+ * Refreshing the fragment interface by updating the enabled activities
+ */
 ExecutionFragmentInterface.prototype.refresh = function () {
   this._enabledActivity = this._mediator.getEnabledActivities();
   const enabledActivityIds = this._enabledActivity.map(
@@ -75,111 +79,18 @@ ExecutionFragmentInterface.prototype.refresh = function () {
     });
 };
 
-ExecutionFragmentInterface.prototype.executeStep = function(activityWithInputOutput, objectData) {
-    this._mediator.executeStep(activityWithInputOutput.id, objectData);
+/**
+ * Execute step with a activity with input and output set and the instances of the objects
+ * 
+ * @param {Activity} activityWithInputOutput - activity with input and output set
+ * @param {String[]} objectData - object instance ids
+ */
+ExecutionFragmentInterface.prototype.executeStep = function(activityWithInputOutputId, objectData) {
+    this._mediator.executeStep(activityWithInputOutputId, objectData);
     this.refresh();
 }
 
 
-// ------------------ Event Handling ------------------
-ExecutionFragmentInterface.prototype.handleOlcListChanged = function (olcs, dryRun = false) {
-    this._olcs = olcs;
-}
-
-ExecutionFragmentInterface.prototype.handleRoleListChanged = function (roles, dryRun = false) {
-    this._roles = roles;
-}
-
-ExecutionFragmentInterface.prototype.handleRoleRenamed = function (role) {
-    this.getTasksWithRole(role).forEach((element) =>
-        this.get('eventBus').fire('element.changed', {
-            element
-        })
-    );
-}
-
-ExecutionFragmentInterface.prototype.handleRoleDeleted = function (role) {
-    this.getTasksWithRole(role).forEach((element, gfx) => {
-        element.businessObject.role = undefined;
-        this.get('eventBus').fire('element.changed', {
-            element
-        });
-    });
-}
-
-ExecutionFragmentInterface.prototype.handleStateRenamed = function (olcState) {
-    this.getDataObjectReferencesInState(olcState).forEach((element, gfx) =>
-        this.get('eventBus').fire('element.changed', {
-            element
-        })
-    );
-}
-
-ExecutionFragmentInterface.prototype.handleStateDeleted = function (olcState) {
-    this.getDataObjectReferencesInState(olcState).forEach((element, gfx) => {
-        element.businessObject.states = without(element.businessObject.states, olcState);
-        this.get('eventBus').fire('element.changed', {
-            element
-        });
-    });
-}
-
-ExecutionFragmentInterface.prototype.handleClassRenamed = function (clazz) {
-    this.getDataObjectReferencesOfClass(clazz).forEach((element, gfx) =>
-        this.get('eventBus').fire('element.changed', {
-            element
-        })
-    );
-}
-
-ExecutionFragmentInterface.prototype.handleClassDeleted = function (clazz) {
-    this.getDataObjectReferencesOfClass(clazz).forEach((element, gfx) =>
-        this.get('modeling').removeElements([element])
-    );
-}
-
-ExecutionFragmentInterface.prototype.getDataObjectReferencesInState = function (olcState) {
-    return this.get('elementRegistry').filter((element, gfx) =>
-        is(element, 'bpmn:DataObjectReference') &&
-        element.type !== 'label' &&
-        element.businessObject.states?.includes(olcState)
-    );
-}
-
-ExecutionFragmentInterface.prototype.getDataObjectReferencesOfClass = function (clazz) {
-    return this.get('elementRegistry').filter((element, gfx) =>
-        is(element, 'bpmn:DataObjectReference') &&
-        element.type !== 'label' &&
-        clazz.id &&
-        element.businessObject.dataclass?.id === clazz.id
-    );
-}
-
-ExecutionFragmentInterface.prototype.getTasksWithRole = function (role) {
-    let list = this.get('elementRegistry').filter((element, gfx) =>
-        is(element, 'bpmn:Task') &&
-        role.id &&
-        element.businessObject.role?.id === role.id
-    );
-    return list;
-}
-
-ExecutionFragmentInterface.prototype.startDoCreation = function (event, elementShape, dataclass, isIncoming) {
-    const shape = this.get('elementFactory').createShape({
-        type: 'bpmn:DataObjectReference'
-    });
-    shape.businessObject.dataclass = dataclass;
-    shape.businessObject.states = [];
-    const hints = isIncoming ?
-        {connectionTarget: elementShape}
-        : undefined;
-    this.get('autoPlace').append(elementShape, shape, hints);
-    // The following works for outgoing data, but breaks the activity for incoming
-    // executionFragmentModeler.get('create').start(event, shape, {
-    //   source: activityShape,
-    //   hints
-    // });
-}
 
 
 var DEFAULT_OPTIONS = {

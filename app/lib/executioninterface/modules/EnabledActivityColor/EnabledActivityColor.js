@@ -3,7 +3,7 @@ import BaseRenderer from "diagram-js/lib/draw/BaseRenderer";
 import {is} from '../../../util/Util';
 import {getSemantic} from 'bpmn-js/lib/draw/BpmnRenderUtil';
 import {attr} from 'tiny-svg';
-const HIGH_PRIORITY = 1500;
+const HIGH_PRIORITY = 1501;
 
 export default class EnabledActivityColor extends BaseRenderer {
     constructor(eventBus, bpmnRenderer) {
@@ -15,6 +15,9 @@ export default class EnabledActivityColor extends BaseRenderer {
         return is(element, 'bpmn:Task');
     }
 
+    /**
+     * If the activity is enabled, color it blue
+     */
     drawShape(parentNode, element) {
         const shape = this.bpmnRenderer.drawShape(parentNode, element);
         const semantic = getSemantic(element);

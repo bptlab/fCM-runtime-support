@@ -1,3 +1,7 @@
+/**
+ * The Execution Interface class is a placeholder for the Execution Interface
+ * It contains the fragment interface and the objec interface
+ */
 export default class ExecutionInterface {
     constructor(fragmentInterface, objectInterface) {
         this.fragmentInterface = fragmentInterface;
