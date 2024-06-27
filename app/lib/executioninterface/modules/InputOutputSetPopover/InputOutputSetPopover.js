@@ -75,7 +75,7 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                     this._inputDropdown.populate(
                         inputMap.keys(),
                         (input) => {
-                            this._selectedInput = input;
+                            this._selectedInput = inputMap.get(input);
                             // Set the selected entry to the selected option
                             this._inputDropdown.getEntries().forEach(entry => entry.setSelected(input === entry.option));
                             populateObjectDropdown();
@@ -104,7 +104,7 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                     this._outputDropdown.populate(
                         outputMap.keys(),
                         (output) => {
-                            this._selectedOutput = output;
+                            this._selectedOutput = outputMap.get(output);
                             // Set the selected entry to the selected option
                             this._outputDropdown.getEntries().forEach(entry => entry.setSelected(output === entry.option));
                             populateObjectDropdown();
@@ -116,13 +116,28 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                 // Update object dropdown based on the selected input and output
                 // Options are only available after input and output set have been selected
                 const populateObjectDropdown = () => {
-                    const selectedActivity = activityWithInputOutput.find(activity => activity.inputSet.set === inputMap.get(this._selectedInput) && activity.outputSet.set === outputMap.get(this._selectedOutput))
+                    const selectedActivity = activityWithInputOutput.find(activity => activity.inputSet.set === this._selectedInput && activity.outputSet.set === this._selectedOutput)
                     if(!selectedActivity) {
                         this._objectDropdown.populate([], () => {}, element);
                         return
                     }
-                    const objects = this._fragmentInterface._mediator.getRelatedObjectGroupsForActivity(selectedActivity.id);
-                    // TODO objects in the dropdown
+                    const objectInputSets = this._fragmentInterface._mediator.getRelatedObjectGroupsForActivity(selectedActivity.id);
+                    const objectMap = new Map();
+                    objectInputSets.forEach((objectInputSet) => {
+                        const key = objectInputSet.map(object => object.instance.name).join(", ");
+                        if (!objectMap.has(key)) {
+                            objectMap.set(key, objectInputSet);
+                        }
+                    });
+                    this._objectDropdown.populate(
+                        objectMap.keys(),
+                        (object) => {
+                            this._selectedObject = objectMap.get(object);
+                            // Set the selected entry to the selected option
+                            this._objectDropdown.getEntries().forEach(entry => entry.setSelected(object === entry.option));
+                        },
+                        element
+                    );
                 }
 
                 populateInputDropdown();
@@ -131,8 +146,9 @@ export default class InputOutputSetPopover extends CommandInterceptor {
 
                 // Execute the step with the selected input and output set and object
                 this._startButton.addEventListener("click", (event) => {
-                    // TODO add object selection
-                    this._fragmentInterface.executeStep(element, inputMap.get(this._selectedInput), outputMap.get(this._selectedOutput));
+                    const selectedActivity = activityWithInputOutput.find(activity => activity.inputSet.set === this._selectedInput && activity.outputSet.set === this._selectedOutput)
+                    const selectedObjects = this._selectedObject.map(object => object.instance.id);
+                    this._fragmentInterface.executeStep(selectedActivity.id, selectedObjects);
                     event.stopPropagation();
                 });
 

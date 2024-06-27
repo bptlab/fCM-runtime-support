@@ -52,6 +52,8 @@ export default class ExecutionMediator {
 
     executeStep(activityId: string, objectIds: string[]) {
         this._executor.executeActivityWithRelatedObjectGroup(activityId, objectIds);
+        const newState = this._executor.currentState;
+        this._objectInterface.update(newState);
     }
 
 
