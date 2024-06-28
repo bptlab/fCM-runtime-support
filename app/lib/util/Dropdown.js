@@ -36,6 +36,7 @@ export default function getDropdown(name = "") {
             entry.option = option;
             entry.classList.add("dd-dropdown-entry");
             entry.innerHTML = labelFunc(option);
+            entry.title = labelFunc(option);
             entry.addEventListener("click", (event) => {
                 onChange(option, element, event);
             });
