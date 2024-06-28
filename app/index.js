@@ -26,6 +26,7 @@ import Zip from 'jszip';
 import {appendOverlayListeners} from "./lib/util/HtmlUtil";
 
 import {exportExecutionPlan} from "../dist/planner/excelExporter/ExcelExporter.js";
+import {ModelObjectParser as PlannerModelObjectParser} from "../planner/parser/ModelObjectParser";
 import {ModelObjectParser} from "../executionEngine/ModelObjectParser";
 import ExecutionFragmentInterface from "./lib/executioninterface/FragmentInterface";
 import ExecutionObjectInterface from "./lib/executioninterface/ObjectInterface";
@@ -241,7 +242,7 @@ async function importFromZip(zipData) {
 }
 
 export async function planButtonAction() {
-    const modelObjectParser = new ModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
+    const modelObjectParser = new PlannerModelObjectParser(dataModeler, fragmentModeler, objectiveModeler, dependencyModeler, roleModeler, resourceModeler);
     const planner = modelObjectParser.createPlanner();
     let executionLog = planner.generatePlan();
     let blob = await exportExecutionPlan(executionLog);
