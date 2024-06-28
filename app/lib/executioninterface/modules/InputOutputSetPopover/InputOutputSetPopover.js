@@ -1,4 +1,5 @@
 import CommandInterceptor from "diagram-js/lib/command/CommandInterceptor";
+import { getSemantic } from "bpmn-js/lib/draw/BpmnRenderUtil";
 import getDropdown from "../../../util/Dropdown";
 import { appendOverlayListeners } from "../../../util/HtmlUtil";
 import { is } from "../../../util/Util";
@@ -43,7 +44,9 @@ export default class InputOutputSetPopover extends CommandInterceptor {
       const element = e.element || e.shape || e.elements[0];
       const mediator = this._fragmentInterface._mediator;
       if (!is(element, "bpmn:Task")) return;
-      // If the element is a task, show the popover
+      // Task is not enabled
+      if (!getSemantic(element).isEnabled) return;
+      // Task is enabled --> show the popover
       this._dropdownContainer.currentElement = element;
       const activity = element.businessObject;
       // All possible combinations of the activity, input and output sets
