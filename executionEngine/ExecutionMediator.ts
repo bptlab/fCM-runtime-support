@@ -8,14 +8,14 @@ import { ModelObjectParser } from "./ModelObjectParser";
 /**
  * Mediator between the execution engine and the execution interfaces (fragment and object)
  * This class is responsible for the communication between the execution engine and the interfaces.
- * It is also responsible for the initialization of the execution engine and interfaces.
+ * It is also responsible for the initialization of the execution engine and interfaces 
+ * and for refreshing the interfaces after each execution step.
  */
 export default class ExecutionMediator {
     // Execution interface and engine access
     private _executor: ExecutionEngine;
     private _fragmentInterface: ExecutionFragmentInterface;
     private _objectInterface: ExecutionObjectInterface;
-    private _modelerData: ModelerData;
     private _parser: ModelObjectParser;
 
     constructor(fragmentInterface: ExecutionFragmentInterface, objectInterface: ExecutionObjectInterface, modelerData: ModelerData, modelObjectParser: ModelObjectParser) {
@@ -38,8 +38,6 @@ export default class ExecutionMediator {
         this._objectInterface = objectInterface;
         objectInterface.setMediator(this);
         this._objectInterface.update(state)
-
-        this._modelerData = modelerData
     }
 
     getEnabledActivities() {
@@ -54,6 +52,7 @@ export default class ExecutionMediator {
         this._executor.executeActivityWithRelatedObjectGroup(activityId, objectIds);
         const newState = this._executor.currentState;
         this._objectInterface.update(newState);
+        this._fragmentInterface.refresh();
     }
 
 

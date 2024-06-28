@@ -79,18 +79,6 @@ ExecutionFragmentInterface.prototype.refresh = function () {
     });
 };
 
-/**
- * Execute step with a activity with input and output set and the instances of the objects
- * 
- * @param {Activity} activityWithInputOutput - activity with input and output set
- * @param {String[]} objectData - object instance ids
- */
-ExecutionFragmentInterface.prototype.executeStep = function(activityWithInputOutputId, objectData) {
-    this._mediator.executeStep(activityWithInputOutputId, objectData);
-    this.refresh();
-}
-
-
 
 
 var DEFAULT_OPTIONS = {
