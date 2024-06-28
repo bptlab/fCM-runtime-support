@@ -19,10 +19,10 @@ export class ExecutionState {
      * Based on the state, creates a new instance of a {@link DataObjectClass} (so an {@link DataObjectInstance}).
      */
     public getNewInstanceOfClass(dataclass: DataObjectClass): DataObjectInstance {
-        const name: string = (this.currentStateInstances.filter(stateInstance =>
+        const alreadyPresentInstancesForClass = this.currentStateInstances.filter(stateInstance =>
             stateInstance.instance.dataclass === dataclass
-        ).length + 1).toString();
-        const id = dataclass.name.toString() + "_" + name.toString()
-        return new DataObjectInstance(id, name, dataclass);
+        );
+        const nameOfNewInstance = `${dataclass.name}${alreadyPresentInstancesForClass.length + 1}`;
+        return new DataObjectInstance(nameOfNewInstance, nameOfNewInstance, dataclass);
     }
 }
