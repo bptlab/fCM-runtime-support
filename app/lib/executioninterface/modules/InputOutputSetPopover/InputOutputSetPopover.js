@@ -176,6 +176,13 @@ export default class InputOutputSetPopover extends CommandInterceptor {
         );
         mediator.executeStep(selectedActivity.id, selectedObjects);
         event.stopPropagation();
+
+        // Close popover after execution
+        closeOverlay(event);
+        // Remove selection
+        this._selectedInput = undefined;
+        this._selectedOutput = undefined;
+        this._selectedObject = undefined;
       });
 
       this._dropdownContainer.handleClick = (event) => {
