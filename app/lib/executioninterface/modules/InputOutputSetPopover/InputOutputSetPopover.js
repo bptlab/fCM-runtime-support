@@ -122,6 +122,7 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                         return
                     }
                     const objectInputSets = this._fragmentInterface._mediator.getRelatedObjectGroupsForActivity(selectedActivity.id);
+                    // Map between a string representation and the actual object input set
                     const objectMap = new Map();
                     objectInputSets.forEach((objectInputSet) => {
                         const key = objectInputSet.map(object => object.instance.name).join(", ");
@@ -129,6 +130,7 @@ export default class InputOutputSetPopover extends CommandInterceptor {
                             objectMap.set(key, objectInputSet);
                         }
                     });
+                    // Show string representation in the dropdown
                     this._objectDropdown.populate(
                         objectMap.keys(),
                         (object) => {
@@ -146,6 +148,9 @@ export default class InputOutputSetPopover extends CommandInterceptor {
 
                 // Execute the step with the selected input and output set and object
                 this._startButton.addEventListener("click", (event) => {
+                    // If no input, output or object is selected, do nothing
+                    if(!this._selectedInput || !this._selectedOutput || !this._selectedObject) 
+                        return;
                     const selectedActivity = activityWithInputOutput.find(activity => activity.inputSet.set === this._selectedInput && activity.outputSet.set === this._selectedOutput)
                     const selectedObjects = this._selectedObject.map(object => object.instance.id);
                     this._fragmentInterface.executeStep(selectedActivity.id, selectedObjects);
@@ -154,12 +159,13 @@ export default class InputOutputSetPopover extends CommandInterceptor {
 
 
                 this._dropdownContainer.handleClick = (event) => {
+                    // Remove selection if the click is outside of the dropdown
                     if (!this._dropdownContainer.contains(event.target)) {
+                        this._selectedInput = undefined;
+                        this._selectedOutput = undefined;
+                        this._selectedObject = undefined;
                         return false;
-                    } else if (event.target.classList.contains('dd-dropdown-entry')) {
-                        this._inputDropdown.clearInput();
-                        this._outputDropdown.clearInput();
-                    } 
+                    }
                     return true;
                 }
 
