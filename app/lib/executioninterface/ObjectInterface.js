@@ -18,22 +18,36 @@ export default class ExecutionObjectInterface {
     update(newExecutionState) {
         const objects = newExecutionState.currentStateInstances
         const references = newExecutionState.instanceLinks
+        
+        const referencesGroupedByClass = references.reduce((groupedReferences, reference) => {
+            const classOfObject = reference.first.dataclass.name
+            const classOfOtherObject = reference.second.dataclass.name
+            if (!groupedReferences.has(classOfObject)) {
+                groupedReferences.set(classOfObject, [])
+            }
+            const referenceClassesList = groupedReferences.get(classOfObject)
+            if (!referenceClassesList.includes(classOfOtherObject)) 
+                referenceClassesList.push(classOfOtherObject)
+            groupedReferences.set(classOfObject, referenceClassesList)
+            return groupedReferences
+        }, new Map())
+
         const objectsWithReferences = objects.map((object) => {
-            const objectReferences = references.filter((reference) => reference.first.id === object.instance.id)
-                .reduce((groupedReferences, reference) => {
-                    const classOfOtherObject = reference.second.dataclass.name
-                    if (!groupedReferences[classOfOtherObject]) {
-                        groupedReferences[classOfOtherObject] = []
-                    }
-                    groupedReferences[classOfOtherObject].push(reference)
-                    return groupedReferences
-                }, {})
+            let objectReferenceMap = new Map()
+            if(referencesGroupedByClass.has(object.instance.dataclass.name)) {
+                objectReferenceMap = referencesGroupedByClass.get(object.instance.dataclass.name).reduce((referenceMap, classOfOtherObject) => {
+                    referenceMap.set(classOfOtherObject, references.filter((reference) => {
+                        return reference.first.id === object.instance.id && reference.second.dataclass.name === classOfOtherObject
+                    }))
+                    return referenceMap
+                }, new Map())
+            }
             return {
                 id: object.instance.id,
                 name: object.instance.name,
                 dataclass: object.instance.dataclass.name,
                 state: object.state,
-                ...objectReferences
+                objectReferenceMap
             }
         })
         
@@ -45,31 +59,40 @@ export default class ExecutionObjectInterface {
             return groupedObjects
         }, {})
 
-        document.getElementById(this._container).innerHTML = Object.keys(objectsGroupedByClass).map((dataclass) => {
+        document.getElementById(this._container).innerHTML = Object.keys(objectsGroupedByClass).toSorted().map((dataclass) => {
             return `<div class="object-class">
                 <h2>Class: ${dataclass}</h2>
                 <div class="objects">
-                    ${objectsGroupedByClass[dataclass].map((object) => {
-                        return `<div class="object">
-                            <h3>Name: ${object.name}</h3>
-                            <p>State: ${object.state}</p>
-                            <div class="references
-                                ${Object.keys(object).filter((key) => key !== "id" && key !== "name" && key !== "dataclass" && key !== "state").map((key) => {
-                                    return `<div class="reference">
-                                        <h4>References to class: ${key}</h4>
-                                        <ul>
-                                            ${object[key].map((reference) => {
-                                                return `<li>${reference.second.name}</li>`
-                                            }).join("")}
-                                        </ul>
-                                    </div>`
-                                }).join("")}
-                            </div>
-                        </div>`
+                    <table class="object-interface-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>State</th>
+                                ${referencesGroupedByClass.has(dataclass) ?referencesGroupedByClass.get(dataclass).toSorted().map((key) => {
+                                    return `<th>${key}</th>`
+                                }).join("")
+                                : ""}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${objectsGroupedByClass[dataclass].map((object) => {
+                                return `<tr>
+                                    <td>${object.name}</td>
+                                    <td>${object.state}</td>
+
+                                    ${referencesGroupedByClass.has(dataclass) ? referencesGroupedByClass.get(dataclass).toSorted().map((classOfOtherObject) => {
+                                        return `<td>
+                                                ${object.objectReferenceMap.get(classOfOtherObject).map((reference) => {
+                                                    return reference.second.name
+                                                }).join(", ")}
+                                        </td>`
+                                    }).join(""): ""}
+                                </tr>`
                             }).join("")}
+                        </tbody>
+                    </table>
                 </div>
             </div>`
-        }).join("")
+        }).join("");
     }
-
 }
