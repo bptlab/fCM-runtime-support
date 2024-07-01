@@ -19,6 +19,7 @@ export default class ExecutionObjectInterface {
         const objects = newExecutionState.currentStateInstances
         const references = newExecutionState.instanceLinks
         
+        // Create Map from classes to a list of classes that are referenced
         const referencesGroupedByClass = references.reduce((groupedReferences, reference) => {
             const classOfObject = reference.first.dataclass.name
             const classOfOtherObject = reference.second.dataclass.name
@@ -32,7 +33,9 @@ export default class ExecutionObjectInterface {
             return groupedReferences
         }, new Map())
 
+        // Collect all objects with their references
         const objectsWithReferences = objects.map((object) => {
+            // Create Map from referenced classes to the referenced objects
             let objectReferenceMap = new Map()
             if(referencesGroupedByClass.has(object.instance.dataclass.name)) {
                 objectReferenceMap = referencesGroupedByClass.get(object.instance.dataclass.name).reduce((referenceMap, classOfOtherObject) => {
