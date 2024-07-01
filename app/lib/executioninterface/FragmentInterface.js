@@ -29,6 +29,8 @@ export default function ExecutionFragmentInterface(options) {
             dragging: ["value", {}],
             move: ["value", {}],
             create: ["value", {}],
+            labelEditingPreview: ["value", {}],
+            labelEditingProvider: ["value", {}],
             // ...
           }
     ];
@@ -71,7 +73,7 @@ ExecutionFragmentInterface.prototype.refresh = function () {
     .forEach((element) => {
       element.businessObject.isEnabled = enabledActivityIds.includes(
         element.id
-      ); 
+      );
 
       this.get("eventBus").fire("element.changed", {
         element,
