@@ -16,13 +16,18 @@ export default class EnabledActivityColor extends BaseRenderer {
     }
 
     /**
-     * If the activity is enabled, color it blue
+     * If the activity is enabled, color it blue.
+     * If the activity is selected, color it light blue instead.
      */
     drawShape(parentNode, element) {
         const shape = this.bpmnRenderer.drawShape(parentNode, element);
         const semantic = getSemantic(element);
-        if (semantic.isEnabled)
+        if (semantic.isEnabled) {
             attr(shape, 'fill', "#0096FF");
+        }
+        if (semantic.isSelected) {
+            attr(shape, 'fill', "#00CAFF");
+        }
         return shape;
     }
 

@@ -157,6 +157,10 @@ export default class InputOutputSetPopover extends CommandInterceptor {
       populateOutputDropdown();
       populateObjectDropdown();
 
+      // Put selection on task element for lighter coloring.
+      element.businessObject.isSelected = true;
+      eventBus.fire("element.changed", { element });
+
       // Execute the step with the selected input and output set and object
       this._startButton.addEventListener("click", (event) => {
         // If no input, output or object is selected, do nothing
@@ -183,6 +187,10 @@ export default class InputOutputSetPopover extends CommandInterceptor {
         this._selectedInput = undefined;
         this._selectedOutput = undefined;
         this._selectedObject = undefined;
+
+        // After executing, also remove selection from task element for regular coloring.
+        element.businessObject.isSelected = false;
+        eventBus.fire("element.changed", { element });
       });
 
       this._dropdownContainer.handleClick = (event) => {
@@ -191,6 +199,11 @@ export default class InputOutputSetPopover extends CommandInterceptor {
           this._selectedInput = undefined;
           this._selectedOutput = undefined;
           this._selectedObject = undefined;
+
+          // When clicking outside of popover, also remove selection from task element for regular coloring.
+          element.businessObject.isSelected = false;
+          eventBus.fire("element.changed", { element });
+
           return false;
         }
         return true;
