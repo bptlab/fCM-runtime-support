@@ -69,7 +69,7 @@ export default class ExecutionObjectInterface {
                     <table class="object-interface-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>Id</th>
                                 <th>State</th>
                                 ${referencesGroupedByClass.has(dataclass) ?referencesGroupedByClass.get(dataclass).toSorted().map((key) => {
                                     return `<th>${key}</th>`
