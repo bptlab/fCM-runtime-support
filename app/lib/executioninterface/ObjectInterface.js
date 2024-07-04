@@ -23,36 +23,55 @@ export default class ExecutionObjectInterface {
         const referencesGroupedByClass = references.reduce((groupedReferences, reference) => {
             const classOfObject = reference.first.dataclass.name
             const classOfOtherObject = reference.second.dataclass.name
-            if (!groupedReferences.has(classOfObject)) {
-                groupedReferences.set(classOfObject, [])
-            }
-            const referenceClassesList = groupedReferences.get(classOfObject)
+            // Add the class of the other object to the list of referenced classes
+            const referenceClassesList = groupedReferences.get(classOfObject) || []
             if (!referenceClassesList.includes(classOfOtherObject)) 
                 referenceClassesList.push(classOfOtherObject)
             groupedReferences.set(classOfObject, referenceClassesList)
+            // Because we display the references in both directions, we need to add the class of the object to the list of referenced classes of the other object
+            const referenceClassesListOther = groupedReferences.get(classOfOtherObject) || []
+            if (!referenceClassesListOther.includes(classOfObject))
+                referenceClassesListOther.push(classOfObject)
+            groupedReferences.set(classOfOtherObject, referenceClassesListOther)
             return groupedReferences
         }, new Map())
 
         // Collect all objects with their references
         const objectsWithReferences = objects.map((object) => {
-            // Create Map from referenced classes to the referenced objects
-            let objectReferenceMap = new Map()
-            if(referencesGroupedByClass.has(object.instance.dataclass.name)) {
-                objectReferenceMap = referencesGroupedByClass.get(object.instance.dataclass.name).reduce((referenceMap, classOfOtherObject) => {
-                    referenceMap.set(classOfOtherObject, references.filter((reference) => {
-                        return reference.first.id === object.instance.id && reference.second.dataclass.name === classOfOtherObject
-                    }))
-                    return referenceMap
-                }, new Map())
-            }
-            return {
-                id: object.instance.id,
-                name: object.instance.name,
-                dataclass: object.instance.dataclass.name,
-                state: object.state,
-                objectReferenceMap
-            }
-        })
+          // Create Map from referenced classes to the referenced objects
+          let objectReferenceMap = new Map();
+          if (referencesGroupedByClass.has(object.instance.dataclass.name)) {
+            objectReferenceMap = referencesGroupedByClass
+              .get(object.instance.dataclass.name)
+              .reduce((referenceMap, classOfOtherObject) => {
+                // Set the reference map for the class of the other object
+                // The reference map is a map from the class of the other object to the list of references
+                // We show the references in both directions
+                referenceMap.set(
+                  classOfOtherObject,
+                  references.filter((reference) => {
+                    return (
+                        // Either the current object is the first object in the reference and the second object is of the class of the other object
+                        // Or the current object is the second object in the reference and the first object is of the class of the other object
+                      (reference.first.id === object.instance.id &&
+                        reference.second.dataclass.name ===
+                          classOfOtherObject) ||
+                      (reference.second.id === object.instance.id &&
+                        reference.first.dataclass.name === classOfOtherObject)
+                    );
+                  })
+                );
+                return referenceMap;
+              }, new Map());
+          }
+          return {
+            id: object.instance.id,
+            name: object.instance.name,
+            dataclass: object.instance.dataclass.name,
+            state: object.state,
+            objectReferenceMap,
+          };
+        });
         
         const objectsGroupedByClass = objectsWithReferences.reduce((groupedObjects, object) => {
             if (!groupedObjects[object.dataclass]) {
@@ -86,7 +105,8 @@ export default class ExecutionObjectInterface {
                                     ${referencesGroupedByClass.has(dataclass) ? referencesGroupedByClass.get(dataclass).toSorted().map((classOfOtherObject) => {
                                         return `<td>
                                                 ${object.objectReferenceMap.get(classOfOtherObject).map((reference) => {
-                                                    return reference.second.name
+                                                    // Show the name of the object with the class of the current column
+                                                    return reference.first.dataclass.name === classOfOtherObject ? reference.first.name : reference.second.name
                                                 }).join(", ")}
                                         </td>`
                                     }).join(""): ""}
