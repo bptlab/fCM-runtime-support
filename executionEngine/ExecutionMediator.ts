@@ -55,6 +55,9 @@ export default class ExecutionMediator {
         this._fragmentInterface.refresh();
     }
 
+    getExecutionHistory() {
+        return this._executor.executionHistory;
+    }
 
 
 }

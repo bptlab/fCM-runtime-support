@@ -62,7 +62,7 @@ export default class ExecutionObjectInterface {
             return groupedObjects
         }, {})
 
-        document.getElementById(this._container).innerHTML = Object.keys(objectsGroupedByClass).toSorted().map((dataclass) => {
+        const dataTables = Object.keys(objectsGroupedByClass).toSorted().map((dataclass) => {
             return `<div class="object-class">
                 <h2>Class: ${dataclass}</h2>
                 <div class="objects">
@@ -97,5 +97,61 @@ export default class ExecutionObjectInterface {
                 </div>
             </div>`
         }).join("");
+
+        // Visualize the event log as an object centric event log
+        const eventLog = this._mediator.getExecutionHistory()
+        // get list of all classes in the event log
+        const classesInEventLog = eventLog.reduce((classes, event) => {
+            const inputClasses = event.inputList.map((data) => data.instance.dataclass.name)
+            const outputClasses = event.outputList.map((data) => data.instance.dataclass.name)
+            inputClasses.concat(outputClasses).forEach((dataclass) => {
+                if (!classes.includes(dataclass)) {
+                    classes.push(dataclass)
+                }
+            })
+            return classes
+        }, [])
+
+        const eventLogTable = `<div class="event-log">
+            <h2>Event Log</h2>
+            <table class="object-interface-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Id</th>
+                        ${classesInEventLog.map((dataclass) => {
+                            return `<th>${dataclass}</th>`
+                        }).join("")}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${eventLog.map((event, index) => {
+                        return `<tr>
+                            <td>${index}</td>
+                            <td>${event.activity.name}</td>
+                            ${classesInEventLog.map((dataclass) => {
+                                // get object of the class and unqiuefy them
+                                const objectsGroupedByClass = event.inputList.concat(event.outputList).filter((data) => data.instance.dataclass.name === dataclass).map((data) => {
+                                    return data.instance.name
+                                })
+
+                                return `<td>{
+                                    ${[...new Set(objectsGroupedByClass)].join(", ")} }
+                                </td>`
+                            }).join("")}
+                        </tr>`
+                    }).join("")}
+                </tbody>
+            </table>
+        </div>`
+
+        document.getElementById(this._container).innerHTML = `<div class="execution-interface">
+            <div class="objects">
+                ${dataTables}
+            </div>
+            <div class="events">
+                ${eventLog.length !==0 ? eventLogTable : ""}
+            </div>
+        </div>`
     }
 }
