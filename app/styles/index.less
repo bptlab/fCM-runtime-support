@@ -235,7 +235,24 @@ body {
 
 #execution-interface > div {
   flex: 1;
-  width: 50%;
+  height: 100%;
+  overflow: auto;
+}
+
+#execution-interface > div:nth-of-type(1) {
+  flex: 0 0 70%;
+}
+
+#execution-interface > div:nth-of-type(2) {
+  flex: 0 0 30%;
+}
+
+.object-class {
+  padding: 1rem;
+}
+
+.object-interface-table {
+  padding-bottom: 2rem;
 }
 
 .object-interface-table > thead > tr > th {
@@ -249,5 +266,6 @@ body {
 }
 
 .event-log {
-  padding-top: 4rem;
+  padding: 1rem;
+  padding-top: 2rem;
 }
