@@ -226,7 +226,7 @@ export default class InputOutputSetPopover extends CommandInterceptor {
           bottom: 0,
           right: 0,
         },
-        scale: false,
+        scale: true,
         html: this._dropdownContainer,
       });
 
