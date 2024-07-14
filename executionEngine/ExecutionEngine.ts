@@ -44,7 +44,7 @@ export class ExecutionEngine {
 
         // Aggregate all groups of objects that can be used for executing the activity.
         const relatedObjectGroupsForActivity: DataObjectInstanceWithState[][] = [];
-        const inputCombinations: DataObjectInstanceWithState[][] = activityToExecute.getPossibleInputCombinations(this.currentState);
+        const inputCombinations: DataObjectInstanceWithState[][] = activityToExecute.getInputCombinationsForExecution(this.currentState, this.executionHistory);
         for (const inputCombination of inputCombinations) {
             // For each possible input combination start a new object group in the output.
             const objectGroup: DataObjectInstanceWithState[] = [];

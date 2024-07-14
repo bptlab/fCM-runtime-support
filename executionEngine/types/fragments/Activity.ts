@@ -39,7 +39,7 @@ export class Activity {
         if (this.needsNoInput()) {
             return [this.getActionForInput([], executionState)];
         }
-        const inputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
+        const inputCombinations: DataObjectInstanceWithState[][] = this.getAllPossibleInputCombinations(executionState);
         return inputCombinations.map(inputCombination => this.getActionForInput([...inputCombination], executionState));
     }
 
@@ -61,7 +61,7 @@ export class Activity {
         if (this.needsNoInput()) {
             return true;
         }
-        const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
+        const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getAllPossibleInputCombinations(executionState);
         return possibleInputCombinations && possibleInputCombinations.length > 0;
     }
 
@@ -72,12 +72,16 @@ export class Activity {
      * Obviously, if the activity has no predecessors, it is always control-flow-enabled.
      */
     private isControlFlowEnabled(executionState: ExecutionState, executionHistory: Action[]): boolean {
+        const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getAllPossibleInputCombinations(executionState);
+        return this.isControlFlowEnabledForInputCombinations(possibleInputCombinations, executionHistory);
+    }
+
+    private isControlFlowEnabledForInputCombinations(possibleInputCombinations: DataObjectInstanceWithState[][], executionHistory: Action[]): boolean {
         const { predecessors, hasParallelPredecessors } = this.predecessorInformation;
         if (predecessors.length === 0) {
             return true;
         }
 
-        const possibleInputCombinations: DataObjectInstanceWithState[][] = this.getPossibleInputCombinations(executionState);
         // For a given predecessor, checks if there is a suitable action for it in the history.
         const canPredecessorBeFoundInHistory = (predecessor: string): boolean => {
             const predicateForHistoricAction = (historicAction: Action): boolean => {
@@ -131,7 +135,7 @@ export class Activity {
      * Aggregates all possible input combinations (combination of {@link DataObjectInstanceWithState} elements) for this activity.
      * Note that, an input set can obviously contain different object references, which need to be checked and that leads to the combinations.
      */
-    public getPossibleInputCombinations(executionState: ExecutionState): DataObjectInstanceWithState[][] {
+    private getAllPossibleInputCombinations(executionState: ExecutionState): DataObjectInstanceWithState[][] {
         const possibleStateInstances: DataObjectInstanceWithState[][] = [];
         for (const dataObjectReference of this.inputSet.set) {
             const matchingStateInstances = executionState.currentStateInstances.filter(stateInstance =>
@@ -140,6 +144,17 @@ export class Activity {
             possibleStateInstances.push(matchingStateInstances);
         }
         return extendedCartesianProduct(possibleStateInstances);
+    }
+
+    /**
+     * Returns all input combinations that are actually usable for executing this activity in a given {@link ExecutionState}.
+     * This means that all possible input combinations are retrieved and then filtered by whether these comply with
+     * the control-flow enablement conditions (therefore the execution history is also needed).
+     * @see isControlFlowEnabledForInputCombination
+     */
+    public getInputCombinationsForExecution(executionState: ExecutionState, executionHistory: Action[]): DataObjectInstanceWithState[][] {
+        return this.getAllPossibleInputCombinations(executionState)
+            .filter(combination => this.isControlFlowEnabledForInputCombinations([combination], executionHistory));
     }
 
     /**
