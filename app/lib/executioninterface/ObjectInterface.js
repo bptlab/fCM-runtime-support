@@ -137,8 +137,8 @@ export default class ExecutionObjectInterface {
             <table class="object-interface-table">
                 <thead>
                     <tr>
-                        <th></th>
                         <th>Id</th>
+                        <th>Activity</th>
                         ${classesInEventLog.map((dataclass) => {
                             return `<th>${dataclass}</th>`
                         }).join("")}
