@@ -40,6 +40,9 @@ npx tsc
 ```
 
 ## Usage
+
+### Design Time
+
 There is a [demo video](https://www.youtube.com/watch?v=bIDZUYBNms0) and a [use case tutorial](/.docs/Tutorial.md) to showcase how to use the initial fcm-js without extensions.
 
 In the top right corner, users can switch between the different modelers for fCM. The Fragment Modeler allows to model the process fragments that define the activities and their ordering constraints. Activities may specify a duration, a role, and a capacity. The expected duration is a fixed number of time units, the role corresponds to a role model, and the capacity determines how many resources of the specified role are required to execute the activity.
@@ -60,6 +63,13 @@ The Resource Model allows to specify the available resources for the case. A res
 The Termination Condition states a logic expression under which the case can be terminated.
 <img width="1440" alt="Screenshot 2023-09-03 at 08 12 14" src="https://github.com/bptlab/fCM-design-support/assets/32839252/57362aa9-5b15-4798-9228-e639530803c8">
 
+### Run Time
+
+You can see the option "Execution Interface" in the dropdown. In the following screenshot you can see it including the (1) fragment interface, (2) data object tables, (3) an enabled activity, (4) an enabled and selected activity, (5) the popover to select input-, output-set, and object data and (6) event log. The numbers are added to the figure.
+
+![paper-ocpm-interface-annotated](https://github.com/user-attachments/assets/d2f1be25-d493-4eaf-8442-16408d20ec83)
+
+By clicking an a enabled activity you can select the input-, output-set, and object data and execute the activity. It'll automatically update the event log, enabled activities and data object tables.
 
 ## License
 
