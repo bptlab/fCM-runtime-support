@@ -6,6 +6,8 @@ Combined with goal models, these extensions allow to automatically compute plans
 
 ### ***[:rocket: Try it live! :rocket:](https://bpt-lab.org/fcm-js/)***
 
+Hint: The deployment only includes the original version without the planning and runtime support.
+
 fcm-js is a modeling tool for fragment-based case management. It aims at supporting users at design time by providing a joint, visual user interface for all artifacts and by integrating automated guideline checking based on fCM guidelines.
 
 The catalog of fCM guidelines is also available in this repository in [the wiki](../../wiki).
